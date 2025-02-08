@@ -94,7 +94,8 @@ def update_vlc_status_periodically():
         # Identify changed keys
         changed_keys = [
             k for k in normalized_vlc_status.keys()
-            if k != "position" and normalized_vlc_status.get(k) != normalized_cache.get(k)
+            if normalized_vlc_status.get(k) != normalized_cache.get(k)
+            # if k != "position" and normalized_vlc_status.get(k) != normalized_cache.get(k)
         ]
 
         other_changes_detected = bool(changed_keys)
