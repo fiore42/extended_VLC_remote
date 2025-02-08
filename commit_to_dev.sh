@@ -4,7 +4,7 @@
 COMMIT_MSG="${1:-$(date +'%Y-%m-%d %H:%M:%S')}"
 
 # Check if there are changes to commit
-if ! git diff --quiet || ! git diff --staged --quiet; then
+if ! git diff --quiet || ! git diff --staged --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     git add .
     git commit -m "$COMMIT_MSG"
     echo "✅ Changes committed: $COMMIT_MSG"
