@@ -18,17 +18,20 @@ with open("config.json", "r") as f:
     config = json.load(f)
 
 VLC_HOST = config["VLC_HOST"]
+VLC_USER = config["VLC_USER"]
 VLC_PASSWORD = config["VLC_PASSWORD"]
 FLASK_HOST = config["FLASK_HOST"]
-FLASK_PORT = config["FLASK_PORT"]
-MAX_VLC_VOLUME = config["MAX_VLC_VOLUME"]
+FLASK_PORT = int(config["FLASK_PORT"])
+MAX_VLC_VOLUME = int(config["MAX_VLC_VOLUME"])
+REFRESH_RATE = int(config["REFRESH_RATE"])
+
 
 vlc_clients = set()  # Set to store connected VLC clients
 vlc_status_cache = None # cache the last status
 
 def fetch_vlc_status(): # function that fetches VLC data
     try:
-        response = requests.get(f"{VLC_HOST}/requests/status.xml", auth=('', VLC_PASSWORD))
+        response = requests.get(f"{VLC_HOST}/requests/status.xml", auth=(VLC_USER, VLC_PASSWORD))
         response.raise_for_status()
         xml_data = response.text
         json_data = xmltodict.parse(xml_data)["root"]  # Parse and extract
@@ -37,19 +40,46 @@ def fetch_vlc_status(): # function that fetches VLC data
         print(f"Error fetching VLC status: {e}")
         return None
 
+import time
+
 def update_vlc_status_periodically():
     global vlc_status_cache
+    last_position = None  # Store last known position separately
+    last_position_update_time = 0  # Store last update timestamp
+
     while True:
         vlc_status = fetch_vlc_status()
+        
+        if not vlc_status:
+            time.sleep(REFRESH_RATE)
+            print(f"Invalid vlc_status")
+            continue
 
-        # print(vlc_status)
+        current_time = time.time()  # Get current timestamp
+        position_changed = (vlc_status_cache and 
+                            "position" in vlc_status and 
+                            vlc_status["position"] != last_position)
 
-        if vlc_status != vlc_status_cache: # check if it has changed
-#            print(vlc_status)
+        # Check if any key other than position has changed
+        other_changes_detected = (
+            vlc_status_cache and 
+            {k: v for k, v in vlc_status.items() if k != "position"} != 
+            {k: v for k, v in vlc_status_cache.items() if k != "position"}
+        )
+
+        # If anything other than position changed, send update immediately
+        if other_changes_detected:
             vlc_status_cache = vlc_status
-            if vlc_status:
-                broadcast_vlc_status(vlc_status)
-        time.sleep(1)  # Adjust polling interval as needed
+            broadcast_vlc_status(vlc_status)
+
+        # If only position changed, enforce 60-second limit
+        elif position_changed and (current_time - last_position_update_time) > 60:
+            last_position_update_time = current_time
+            last_position = vlc_status["position"]
+            vlc_status_cache = vlc_status
+            broadcast_vlc_status(vlc_status)
+
+        time.sleep(REFRESH_RATE)
 
 def broadcast_vlc_status(status):
     """Send VLC status updates to all connected clients."""
@@ -102,7 +132,7 @@ def update_system_volume_periodically():
             current_system_volume = system_volume
             print(f"Broadcasting system volume update: {system_volume}")
             broadcast_system_volume(system_volume)  # Send update to all clients
-        time.sleep(1)
+        time.sleep(REFRESH_RATE)
 
 @app.route('/system_volume')
 def system_volume():
