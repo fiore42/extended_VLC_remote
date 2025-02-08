@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Control Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <h1 id="mediaTitle">Media Title</h1>
+
+    <div class="controls-container">  
+        <div class="controls">
+            <button id="seekBack10">⏪ -10s</button>
+            <button id="playPause">▶️ Play</button>
+            <button id="seekFwd10">⏩ +10s</button>
+        </div>
+        <div class="controls">
+            <button id="seekBack60">⏪ -60s</button>
+            <button id="fullscreenToggle">🖥️ Fullscreen</button>
+            <button id="seekFwd60">⏩ +60s</button>
+        </div>
+    </div>
+
+    <!-- Seek Slider -->
+    <div class="slider-container">
+        <h2>Seek</h2>
+        <input type="range" class="slider" id="seekSlider" min="0" max="100" value="0">
+        <span id="seekValue">0%</span>
+    </div>
+
+    <!-- VLC Volume Slider -->
+    <div class="slider-container">
+        <h2>VLC Volume</h2>
+        <input type="range" class="slider" id="vlcVolume" min="0" max="100" value="100">
+        <span id="vlcValue">100%</span>
+    </div>
+
+    <!-- System Volume Slider -->
+    <div class="slider-container">
+        <h2>System Volume</h2>
+        <input type="range" class="slider" id="systemVolume" min="0" max="100" value="100">
+        <span id="systemValue">100%</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
