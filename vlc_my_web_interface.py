@@ -100,7 +100,7 @@ def update_vlc_status_periodically():
         other_changes_detected = bool(changed_keys)
 
         if other_changes_detected:
-            print(f"🔄 VLC Status Changed: {changed_keys}")  # Debug: Print changed keys
+            print(f"VLC Status Changed: {changed_keys}")  # Debug: Print changed keys
             vlc_status_cache = vlc_status
             broadcast_vlc_status(vlc_status)
 
