@@ -62,29 +62,27 @@ def fetch_vlc_status(): # function that fetches VLC data
 import json
 import time
 
+import json
+import time
+
+# Define the set of ignored keys that should only be updated every 60 seconds
+IGNORED_KEYS = {'time', 'position', 'stats'}
+
 def update_vlc_status_periodically():
     global vlc_status_cache
-    last_position = None  # Store last known position separately
-    last_position_update_time = 0  # Store last update timestamp
+    last_update_time = 0  # Store last update timestamp for ignored keys
 
     while True:
         vlc_status = fetch_vlc_status()
         
         if not vlc_status:
             time.sleep(REFRESH_RATE)
-            print(f"Invalid vlc_status")
+            print("⚠Invalid vlc_status")
             continue
 
         current_time = time.time()  # Get current timestamp
-        position = vlc_status.get("position")
 
-        # Initialize `last_position` if first run
-        if last_position is None:
-            last_position = position
-
-        position_changed = position is not None and position != last_position
-
-        # Convert nested dictionaries to JSON strings for comparison
+        # Convert nested dictionaries to JSON strings for accurate comparison
         def normalize_dict(d):
             return {k: json.dumps(v, sort_keys=True) if isinstance(v, dict) else v for k, v in d.items()}
 
@@ -95,25 +93,28 @@ def update_vlc_status_periodically():
         changed_keys = [
             k for k in normalized_vlc_status.keys()
             if normalized_vlc_status.get(k) != normalized_cache.get(k)
-            # if k != "position" and normalized_vlc_status.get(k) != normalized_cache.get(k)
         ]
 
-        other_changes_detected = bool(changed_keys)
+        # Separate ignored keys from immediate update keys
+        ignored_keys_changed = [k for k in changed_keys if k in IGNORED_KEYS]
+        immediate_keys_changed = [k for k in changed_keys if k not in IGNORED_KEYS]
 
-        if other_changes_detected:
-            print(f"VLC Status Changed: {changed_keys}")  # Debug: Print changed keys
+        # Determine if an update should be broadcast
+        should_broadcast_ignored = bool(ignored_keys_changed) and (current_time - last_update_time) > 60
+        should_broadcast_immediate = bool(immediate_keys_changed)
+
+        if should_broadcast_immediate:
+            print(f"Immediate VLC Status Changed: {immediate_keys_changed}")
             vlc_status_cache = vlc_status
             broadcast_vlc_status(vlc_status)
 
-        elif position_changed and (current_time - last_position_update_time) > 60:
-            print("⏳ Position updated but waiting 60 seconds before broadcasting")
-            last_position_update_time = current_time
-            last_position = position
+        elif should_broadcast_ignored:
+            print(f"Ignored VLC Status Changed (delayed): {ignored_keys_changed}")
+            last_update_time = current_time
             vlc_status_cache = vlc_status
             broadcast_vlc_status(vlc_status)
 
         time.sleep(REFRESH_RATE)
-
 
 
 def broadcast_vlc_status(status):
