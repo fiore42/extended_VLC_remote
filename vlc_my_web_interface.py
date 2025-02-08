@@ -40,63 +40,67 @@ def fetch_vlc_status(): # function that fetches VLC data
         print(f"Error fetching VLC status: {e}")
         return None
 
-def update_vlc_status_periodically():
-    global vlc_status_cache
-    last_position = None  # Store last known position separately
-    last_position_update_time = 0  # Store last update timestamp
-    while True:
-        vlc_status = fetch_vlc_status()
-
-        if not vlc_status:
-            time.sleep(REFRESH_RATE)
-            print(f"Invalid vlc_status")
-            continue
-
-        if vlc_status != vlc_status_cache: # check if it has changed
-            print(vlc_status)
-            vlc_status_cache = vlc_status
-            if vlc_status:
-                broadcast_vlc_status(vlc_status)
-        time.sleep(REFRESH_RATE)       
-
 # def update_vlc_status_periodically():
 #     global vlc_status_cache
 #     last_position = None  # Store last known position separately
 #     last_position_update_time = 0  # Store last update timestamp
-
 #     while True:
 #         vlc_status = fetch_vlc_status()
-        
+
 #         if not vlc_status:
 #             time.sleep(REFRESH_RATE)
 #             print(f"Invalid vlc_status")
 #             continue
 
-#         current_time = time.time()  # Get current timestamp
-#         position_changed = (vlc_status_cache and 
-#                             "position" in vlc_status and 
-#                             vlc_status["position"] != last_position)
-
-#         # Check if any key other than position has changed
-#         other_changes_detected = (
-#             vlc_status_cache and 
-#             {k: v for k, v in vlc_status.items() if k != "position"} != 
-#             {k: v for k, v in vlc_status_cache.items() if k != "position"}
-#         )
-
-#         # If anything other than position changed, send update immediately
-#         if other_changes_detected:
+#         if vlc_status != vlc_status_cache: # check if it has changed
+#             print(vlc_status)
 #             vlc_status_cache = vlc_status
-#             broadcast_vlc_status(vlc_status)
+#             if vlc_status:
+#                 broadcast_vlc_status(vlc_status)
+#         time.sleep(REFRESH_RATE)       
 
-#         # If only position changed, enforce 60-second limit
-#         elif position_changed and (current_time - last_position_update_time) > 60:
-#             last_position_update_time = current_time
-#             last_position = vlc_status["position"]
-#             vlc_status_cache = vlc_status
-#             broadcast_vlc_status(vlc_status)
+def update_vlc_status_periodically():
+    global vlc_status_cache
+    last_position = None  # Store last known position separately
+    last_position_update_time = 0  # Store last update timestamp
 
-#         time.sleep(REFRESH_RATE)
+    while True:
+        vlc_status = fetch_vlc_status()
+        
+        if not vlc_status:
+            time.sleep(REFRESH_RATE)
+            print(f"Invalid vlc_status")
+            continue
+
+        current_time = time.time()  # Get current timestamp
+        position = vlc_status.get("position")
+
+        # Initialize `last_position` if first run
+        if last_position is None:
+            last_position = position
+
+        position_changed = position is not None and position != last_position
+
+        # Check if any key other than position has changed
+        other_changes_detected = (
+            vlc_status_cache and 
+            set(vlc_status.items()) - {("position", position)} != 
+            set(vlc_status_cache.items()) - {("position", vlc_status_cache.get("position"))}
+        )
+
+        # If anything other than position changed, send update immediately
+        if other_changes_detected:
+            vlc_status_cache = vlc_status
+            broadcast_vlc_status(vlc_status)
+
+        # If only position changed, enforce 60-second limit
+        elif position_changed and (current_time - last_position_update_time) > 60:
+            last_position_update_time = current_time
+            last_position = position
+            vlc_status_cache = vlc_status
+            broadcast_vlc_status(vlc_status)
+
+        time.sleep(REFRESH_RATE)
 
 def broadcast_vlc_status(status):
     """Send VLC status updates to all connected clients."""
