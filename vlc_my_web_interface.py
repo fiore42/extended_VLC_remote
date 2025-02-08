@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from flask import Flask, request, render_template, jsonify, Response, send_from_directory
 import requests
 import subprocess
