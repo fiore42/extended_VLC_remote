@@ -81,11 +81,17 @@ def update_vlc_status_periodically():
 
         position_changed = position is not None and position != last_position
 
-        # Check if any key other than position has changed
+        # Convert nested dictionaries to JSON strings for comparison
+        def normalize_dict(d):
+            return {k: json.dumps(v, sort_keys=True) if isinstance(v, dict) else v for k, v in d.items()}
+
+        normalized_vlc_status = normalize_dict(vlc_status)
+        normalized_cache = normalize_dict(vlc_status_cache) if vlc_status_cache else {}
+
         other_changes_detected = (
             vlc_status_cache and 
-            set(vlc_status.items()) - {("position", position)} != 
-            set(vlc_status_cache.items()) - {("position", vlc_status_cache.get("position"))}
+            {k: v for k, v in normalized_vlc_status.items() if k != "position"} != 
+            {k: v for k, v in normalized_cache.items() if k != "position"}
         )
 
         # If anything other than position changed, send update immediately
@@ -101,6 +107,7 @@ def update_vlc_status_periodically():
             broadcast_vlc_status(vlc_status)
 
         time.sleep(REFRESH_RATE)
+
 
 def broadcast_vlc_status(status):
     """Send VLC status updates to all connected clients."""
