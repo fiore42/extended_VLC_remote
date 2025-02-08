@@ -52,7 +52,7 @@ def update_vlc_status_periodically():
             vlc_status_cache = vlc_status
             if vlc_status:
                 broadcast_vlc_status(vlc_status)
-        time.sleep(REFRESH_RATE)       
+        time.sleep(1)       
 
 # def update_vlc_status_periodically():
 #     global vlc_status_cache
