@@ -53,7 +53,7 @@ def update_vlc_status_periodically():
             continue
 
         if vlc_status != vlc_status_cache: # check if it has changed
-            print(vlc_status)
+            # print(vlc_status)
             vlc_status_cache = vlc_status
             if vlc_status:
                 broadcast_vlc_status(vlc_status)
