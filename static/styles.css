@@ -1,0 +1,170 @@
+
+:root { 
+  --light-orange: #DC8232; 
+  --dark-orange: #CD6E2D;
+  --light-blue: #007bff;
+  --dark-blue: #0056b3;
+}
+
+body { 
+    font-family: Arial, sans-serif; 
+    max-width: 800px; 
+    margin: 20px auto; 
+    padding: 0 20px;
+}
+
+.slider { width: 300px; }
+
+.slider-container {
+    margin: 15px 0;
+    text-align: left;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px 15px;
+    border: none;
+    background-color: var(--light-orange);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Default hover effect (desktop only) */
+button:hover {
+    background-color: var(--dark-orange);
+}
+
+button:active {
+    background-color: var(--dark-orange);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: left; /* ✅ Left align on desktop */
+    align-items: center;
+    margin-bottom: 10px; /* ✅ Reduce space between rows */
+}
+
+.controls-container {
+    display: grid;
+    grid-template-columns: 1fr; /* One column (full width) */
+    row-gap: 10px; /* The spacing between rows */
+}
+
+/* Make all buttons have equal height and width */
+.controls button {
+    width: 100px;  /* Fixed width for uniform size */
+    height: 60px;  /* Fixed height for uniform size */
+    font-size: 18px;
+    padding: 10px;
+    border: none;
+    background-color: var(--light-orange);
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Adjust button hover effect */
+.controls button:hover {
+    background-color: var(--dark-orange);
+}
+
+
+/* Mobile-specific styles (Applied only if JS detects mobile) */
+body.mobile {
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;  /* Slightly larger padding for better spacing */
+    text-align: center;
+}
+
+/* Mobile-specific styles (Recommended) */
+body.mobile #seekBack10,
+body.mobile #seekFwd10,
+body.mobile #seekBack60,
+body.mobile #seekFwd60 {
+    touch-action: manipulation;
+}
+
+/* Disable hover effect when body has "mobile" class */
+body.mobile button:hover {
+    background-color: var(--light-orange); /* ✅ Removes hover effect on mobile */
+}
+
+.mobile .slider {
+    width: 90%;
+    height: 30px; /* ✅ REALLY THICK SLIDER for thumb */
+}
+
+.mobile .slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0; /* Reset margins */
+    padding: 0; /* Reset padding */
+}
+
+.mobile .slider-container span {
+    display: block;  /* ✅ Forces number below slider only on mobile */
+    margin-top: 5px; /* ✅ Adds space between slider and number */
+    text-align: center; /* ✅ Keeps number aligned */
+}
+
+
+body.mobile input[type="range"]::-webkit-slider-runnable-track {
+    height: 30px;
+    background: #ddd;
+    border-radius: 15px;
+}
+
+body.mobile input[type="range"]::-webkit-slider-thumb {
+    height: 40px;
+    width: 40px;
+    background: #555;
+    border-radius: 50%;
+    margin-top: -5px;
+    cursor: pointer;
+}
+
+body.mobile input[type="range"]::-moz-range-track {
+    height: 30px;
+    background: #ddd;
+    border-radius: 15px;
+}
+
+body.mobile input[type="range"]::-moz-range-thumb {
+    height: 40px;
+    width: 40px;
+    background: #555;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.mobile .controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-content: center;
+    text-align: center;
+}
+
+.mobile .controls-container {
+    row-gap: 20px; /* The spacing between rows */
+}
+
+#mediaTitle {
+    font-size: 16px; /* ✅ Smaller movie title font */
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+body.mobile #mediaTitle {
+    font-size: 14px; /* ✅ Even smaller font on mobile */
+}
