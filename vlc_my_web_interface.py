@@ -59,6 +59,9 @@ def fetch_vlc_status(): # function that fetches VLC data
 #                 broadcast_vlc_status(vlc_status)
 #         time.sleep(REFRESH_RATE)       
 
+import json
+import time
+
 def update_vlc_status_periodically():
     global vlc_status_cache
     last_position = None  # Store last known position separately
@@ -88,25 +91,28 @@ def update_vlc_status_periodically():
         normalized_vlc_status = normalize_dict(vlc_status)
         normalized_cache = normalize_dict(vlc_status_cache) if vlc_status_cache else {}
 
-        other_changes_detected = (
-            vlc_status_cache and 
-            {k: v for k, v in normalized_vlc_status.items() if k != "position"} != 
-            {k: v for k, v in normalized_cache.items() if k != "position"}
-        )
+        # Identify changed keys
+        changed_keys = [
+            k for k in normalized_vlc_status.keys()
+            if k != "position" and normalized_vlc_status.get(k) != normalized_cache.get(k)
+        ]
 
-        # If anything other than position changed, send update immediately
+        other_changes_detected = bool(changed_keys)
+
         if other_changes_detected:
+            print(f"🔄 VLC Status Changed: {changed_keys}")  # Debug: Print changed keys
             vlc_status_cache = vlc_status
             broadcast_vlc_status(vlc_status)
 
-        # If only position changed, enforce 60-second limit
         elif position_changed and (current_time - last_position_update_time) > 60:
+            print("⏳ Position updated but waiting 60 seconds before broadcasting")
             last_position_update_time = current_time
             last_position = position
             vlc_status_cache = vlc_status
             broadcast_vlc_status(vlc_status)
 
         time.sleep(REFRESH_RATE)
+
 
 
 def broadcast_vlc_status(status):
