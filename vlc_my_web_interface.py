@@ -42,10 +42,15 @@ def fetch_vlc_status(): # function that fetches VLC data
 
 def update_vlc_status_periodically():
     global vlc_status_cache
+    last_position = None  # Store last known position separately
+    last_position_update_time = 0  # Store last update timestamp
     while True:
         vlc_status = fetch_vlc_status()
 
-        # print(vlc_status)
+        if not vlc_status:
+            time.sleep(REFRESH_RATE)
+            print(f"Invalid vlc_status")
+            continue
 
         if vlc_status != vlc_status_cache: # check if it has changed
 #            print(vlc_status)
