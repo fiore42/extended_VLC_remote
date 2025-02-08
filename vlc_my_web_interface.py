@@ -12,13 +12,16 @@ import xmltodict
 import json
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-    
-# Configuration variables at the top
-VLC_HOST = "http://localhost:8090"  # Adjust this to your VLC's address
-VLC_PASSWORD = "password"  # Replace with your VLC password
-FLASK_HOST = '0.0.0.0'  # Host for the Flask app
-FLASK_PORT = 5000  # Port for the Flask app
 
+
+with open("config.json", "r") as f:
+    config = json.load(f)
+
+VLC_HOST = config["VLC_HOST"]
+VLC_PASSWORD = config["VLC_PASSWORD"]
+FLASK_HOST = config["FLASK_HOST"]
+FLASK_PORT = config["FLASK_PORT"]
+MAX_VLC_VOLUME = config["MAX_VLC_VOLUME"]
 
 vlc_clients = set()  # Set to store connected VLC clients
 vlc_status_cache = None # cache the last status
