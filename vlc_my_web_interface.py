@@ -40,7 +40,7 @@ def fetch_vlc_status(): # function that fetches VLC data
         print(f"Error fetching VLC status: {e}")
         return None
 
-ef update_vlc_status_periodically():
+def update_vlc_status_periodically():
     global vlc_status_cache
     while True:
         vlc_status = fetch_vlc_status()
