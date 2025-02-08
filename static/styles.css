@@ -1,12 +1,26 @@
 
-:root { 
-  --light-orange: #DC8232; 
+:root {
+  --light-orange: #DC8232;
   --dark-orange: #CD6E2D;
   --light-blue: #007bff;
   --dark-blue: #0056b3;
+
+  /* Default Light Mode */
+  --background-color: white;
+  --text-color: black;
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: black;
+    --text-color: white;
+  }
 }
 
 body { 
+    color: var(--text-color);
+    background-color: var(--background-color);
     font-family: Arial, sans-serif; 
     max-width: 800px; 
     margin: 20px auto; 
@@ -21,11 +35,11 @@ body {
 }
 
 button {
+    color: var(--text-color);
+    background-color: var(--light-orange);
     font-size: 18px;
     padding: 10px 15px;
     border: none;
-    background-color: var(--light-orange);
-    color: white;
     border-radius: 5px;
     cursor: pointer;
 }
@@ -56,13 +70,13 @@ button:active {
 
 /* Make all buttons have equal height and width */
 .controls button {
+    color: var(--text-color);
+    background-color: var(--light-orange);
     width: 100px;  /* Fixed width for uniform size */
     height: 60px;  /* Fixed height for uniform size */
     font-size: 18px;
     padding: 10px;
     border: none;
-    background-color: var(--light-orange);
-    color: white;
     border-radius: 5px;
     text-align: center;
     cursor: pointer;

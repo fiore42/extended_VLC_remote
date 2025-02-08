@@ -15,6 +15,14 @@ function checkScreenSize() {
     }
 }
 
+function applyTheme() {
+    const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.body.classList.toggle("dark-mode", isDarkMode);
+}
+
+applyTheme(); // Apply on load
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme); // Listen for changes
+
 checkScreenSize();
 window.addEventListener('resize', checkScreenSize);
 
