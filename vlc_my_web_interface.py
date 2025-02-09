@@ -75,7 +75,7 @@ try:
     VLC_PORT = int(config["VLC_PORT"])
     VLC_ADDR = config["VLC_ADDR"]
     VLC_USER = config["VLC_USER"]
-    VLC_PWD = config["VLC_PWD"] 
+    VLC_PASSWORD = config["VLC_PWD"] 
 except ValueError as e:
     sys.exit(f"Error: Invalid numeric value in configuration: {e}")
 
