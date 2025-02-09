@@ -368,6 +368,9 @@ def list_media():
 
     requested_path = request.args.get("path")
 
+    print(f"LAST_OPENED: {LAST_OPENED}")  # Debugging output
+    print(f"requested_path: {requested_path}")  # Debugging output
+
     # If LAST_OPENED is enabled and no specific path is requested, use the last folder browsed
     if LAST_OPENED and not requested_path:
         requested_path = last_opened_folder or MEDIA_DIR  # Default to MEDIA_DIR if never set
