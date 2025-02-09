@@ -288,18 +288,20 @@ def vlc_play():
 
     # Decode and then re-encode correctly (spaces as %20, but keep slashes)
     #file_path = unquote(file_path)
-    encoded_path = quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
+#    encoded_path = quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
 
-    print(f"encoded_path: {encoded_path}")
+#    print(f"encoded_path: {encoded_path}")
 
 
-    params = {"command": "in_play", "input": encoded_path}
-    full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
+    params = {"command": "in_play", "input": file_path}
+#    full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
 
-    print(f"Sending VLC play request: {full_url}")
+#    print(f"Sending VLC play request: {full_url}")
+
+    print(f"params: {params}")
 
     try:
-        response = requests.get(full_url, auth=(VLC_USER, VLC_PASSWORD))
+        response = requests.get(params, auth=(VLC_USER, VLC_PASSWORD))
         response.raise_for_status()
         return jsonify({"status": "success", "file": file_path})
     except requests.exceptions.RequestException as e:
