@@ -151,13 +151,13 @@ function processVLCStatus(data) {
 
     // **Toggle UI based on filename**
     if (!filename || filename === "Unknown Title") {
-        document.getElementById('browserView').style.display = 'block';
-        document.getElementById('remoteControlView').style.display = 'none';
+        document.getElementById('browserSection').style.display = 'block';
+        document.getElementById('vlcSection').style.display = 'none';
         console.log("VLC is idle. Showing browser view.");
         return;  // Exit early since VLC is not playing anything
     } else {
-        document.getElementById('browserView').style.display = 'none';
-        document.getElementById('remoteControlView').style.display = 'block';
+        document.getElementById('browserSection').style.display = 'none';
+        document.getElementById('vlcSection').style.display = 'block';
     }
 
     // **Update Remote Control UI**
