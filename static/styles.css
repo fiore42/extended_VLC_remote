@@ -34,6 +34,22 @@ body {
     text-align: left;
 }
 
+input[type="range"]::-webkit-slider-runnable-track {
+    background: #ddd;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    background: #555;
+}
+
+input[type="range"]::-moz-range-track {
+    background: #ddd;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background: #555;
+}
+
 button {
     color: var(--text-color);
     background-color: var(--light-orange);
