@@ -7,5 +7,6 @@
   "FLASK_PORT": 5000,
   "MAX_VLC_VOLUME": 512,
   "_comment": "REFRESH_RATE: how many seconds between checks on the server side for updates",
-  "REFRESH_RATE": 1
+  "REFRESH_RATE": 1,
+  "MEDIA_DIR": "/data"
 }

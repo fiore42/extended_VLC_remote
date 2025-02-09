@@ -35,11 +35,13 @@ FLASK_HOST = config["FLASK_HOST"]
 FLASK_PORT = int(config["FLASK_PORT"])
 MAX_VLC_VOLUME = int(config["MAX_VLC_VOLUME"])
 REFRESH_RATE = int(config["REFRESH_RATE"])
+MEDIA_DIR = config["MEDIA_DIR"]
 
+VLC_STATUS_URL = f"{VLC_HOST}/requests/status.xml"
 
 def fetch_vlc_status(): # function that fetches VLC data
     try:
-        response = requests.get(f"{VLC_HOST}/requests/status.xml", auth=(VLC_USER, VLC_PASSWORD))
+        response = requests.get(VLC_STATUS_URL, auth=(VLC_USER, VLC_PASSWORD))
         response.raise_for_status()
         xml_data = response.text
         json_data = xmltodict.parse(xml_data)["root"]  # Parse and extract
@@ -302,9 +304,7 @@ def vlc_command():
     value = request.args.get('val', '')
 
     try:
-        requests.get(f"{VLC_HOST}/requests/status.xml", 
-                     params={"command": command, "val": value},
-                     auth=('', VLC_PASSWORD))
+        requests.get(VLC_STATUS_URL, params={"command": command, "val": value}, auth=(VLC_USER, VLC_PASSWORD))
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
