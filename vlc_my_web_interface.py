@@ -352,5 +352,5 @@ if __name__ == '__main__':
     vlc_status_thread.start()
     
     print("Flask app is starting...")  # Debug log to confirm startup
-    app.run(host=FLASK_HOST, port=FLASK_PORT)  # Start Flask server
-
+    #app.run(host=FLASK_HOST, port=FLASK_PORT)  # Start Flask server
+    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=True)
