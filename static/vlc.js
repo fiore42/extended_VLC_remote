@@ -117,44 +117,62 @@ function getSystemVolume(value) {
 function processVLCStatus(data) {
     console.log("Received VLC Data:", data);  // Debugging output
 
-    // Extract filename from VLC status XML
+    //When VLC is playing, information.category is an array.
+    //When VLC is not playing, information.category is an object.
+
     let filename = "Unknown Title";
+
+    // Check if 'information' and 'category' exist
     if (data.information && data.information.category) {
-        let metaCategory = data.information.category.find(cat => cat["@name"] === "meta");
+        let categories = data.information.category;
+
+        // Convert object to array if necessary
+        if (!Array.isArray(categories)) {
+            categories = [categories];  // Wrap in an array
+        }
+
+        console.log("Processed categories array:", categories);
+
+        // Find the "meta" category
+        let metaCategory = categories.find(cat => cat["@name"] === "meta");
+
         if (metaCategory && metaCategory.info) {
-            let filenameInfo = metaCategory.info.find(info => info["@name"] === "filename");
-            if (filenameInfo) {
+            let metaInfo = Array.isArray(metaCategory.info) ? metaCategory.info : [metaCategory.info];
+
+            // Find the filename
+            let filenameInfo = metaInfo.find(info => info["@name"] === "filename");
+            if (filenameInfo && filenameInfo["#text"]) {
                 filename = filenameInfo["#text"];
             }
         }
     }
 
+    console.log("Final extracted filename:", filename);
+
     // **Toggle UI based on filename**
     if (!filename || filename === "Unknown Title") {
-        // Show browser interface, hide remote control
         document.getElementById('browserView').style.display = 'block';
         document.getElementById('remoteControlView').style.display = 'none';
         console.log("VLC is idle. Showing browser view.");
-        return; // Exit early since we don't need to update the remote control
+        return;  // Exit early since VLC is not playing anything
     } else {
-        // Show remote control, hide browser interface
         document.getElementById('browserView').style.display = 'none';
         document.getElementById('remoteControlView').style.display = 'block';
     }
 
-    // Update UI elements
+    // **Update Remote Control UI**
     document.getElementById('mediaTitle').textContent = filename;
     document.getElementById('seekSlider').value = data.position * 100;
     document.getElementById('seekValue').textContent = `${Math.round(data.position * 100)}%`;
-    // Scale VLC volume (0-512) to slider range (0-100)
 
+    // Scale VLC volume (0-512) to slider range (0-100)
     const scaledVolume = Math.round((data.volume / CONFIG.MAX_VLC_VOLUME) * 100);
     document.getElementById('vlcVolume').value = scaledVolume;
     document.getElementById('vlcValue').textContent = `${scaledVolume}%`;
-    document.getElementById('playPause').textContent = data.state === "playing" ? "⏸️ Pause" : "▶️ Play";
-    document.getElementById('fullscreenToggle').textContent = data.fullscreen === "true" ? "🔲 Exit Fullscreen" : "🖥️ Fullscreen";
 
-    // Debugging output for all elements
+    document.getElementById('playPause').textContent = data.state === "playing" ? "⏸ Pause" : "▶ Play";
+    document.getElementById('fullscreenToggle').textContent = data.fullscreen === "true" ? "⛶ Exit Fullscreen" : "⛶ Fullscreen";
+
     console.log("Filename:", filename);
     console.log("Seek Position:", document.getElementById('seekSlider').value);
     console.log("Seek Display:", document.getElementById('seekValue').textContent);
