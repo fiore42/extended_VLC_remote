@@ -145,6 +145,15 @@ function sendVLCCommand(command, value = "") {
         });
 }
 
+document.getElementById("menuButton").addEventListener("click", function() {
+    document.getElementById("sidebar").style.left = "0";
+});
+
+document.getElementById("closeMenu").addEventListener("click", function() {
+    document.getElementById("sidebar").style.left = "-250px";
+});
+
+
 // Seek Back/Fwd
 document.getElementById('seekBack10').addEventListener('click', () => sendVLCCommand("seek", "-10S"));
 // Play/Pause Toggle
