@@ -129,6 +129,19 @@ function processVLCStatus(data) {
         }
     }
 
+    // **Toggle UI based on filename**
+    if (!filename || filename === "Unknown Title") {
+        // Show browser interface, hide remote control
+        document.getElementById('browserView').style.display = 'block';
+        document.getElementById('remoteControlView').style.display = 'none';
+        console.log("VLC is idle. Showing browser view.");
+        return; // Exit early since we don't need to update the remote control
+    } else {
+        // Show remote control, hide browser interface
+        document.getElementById('browserView').style.display = 'none';
+        document.getElementById('remoteControlView').style.display = 'block';
+    }
+
     // Update UI elements
     document.getElementById('mediaTitle').textContent = filename;
     document.getElementById('seekSlider').value = data.position * 100;
