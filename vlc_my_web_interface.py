@@ -10,12 +10,23 @@ import queue
 import os
 import xmltodict
 import json
+import sys
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-
-with open("static/config.json", "r") as f:
-    config = json.load(f)
+try:
+    with open("static/config.json", "r") as f:
+        config = json.load(f)
+    print("✅ Config loaded successfully.")
+except FileNotFoundError:
+    print("❌ ERROR: Config file 'static/config.json' not found.", file=sys.stderr)
+    sys.exit(1)  # Exit with error code 1
+except json.JSONDecodeError:
+    print("❌ ERROR: Config file 'static/config.json' is not a valid JSON file.", file=sys.stderr)
+    sys.exit(1)  # Exit with error code 1
+except Exception as e:
+    print(f"❌ ERROR: Unexpected error loading config: {e}", file=sys.stderr)
+    sys.exit(1)  # Exit with error code 1
 
 VLC_HOST = config["VLC_HOST"]
 VLC_USER = config["VLC_USER"]
@@ -292,6 +303,12 @@ def vlc_command():
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/config')
+def get_config():
+    """Serve config.json to the frontend."""
+    return config_data, 200, {"Content-Type": "application/json"}
 
 
 @app.route('/')
