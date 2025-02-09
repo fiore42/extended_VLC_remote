@@ -79,6 +79,9 @@ try:
 except ValueError as e:
     sys.exit(f"Error: Invalid numeric value in configuration: {e}")
 
+# Print out the final config values (optional)
+print(f"Final Config Values:\n{json.dumps(config, indent=2)}")
+
 VLC_URL = f"http://{VLC_ADDR}:{VLC_PORT}"
 
 VLC_STATUS_URL = f"{VLC_URL}/requests/status.xml"
