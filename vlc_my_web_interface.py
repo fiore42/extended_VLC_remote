@@ -314,9 +314,9 @@ def list_media():
     If a folder contains only one valid file, return it for autoplay.
     """
     requested_path = request.args.get('path', MEDIA_DIR)
-
-    # Ensure requested path is within MEDIA_DIR
     requested_path = os.path.abspath(os.path.join(MEDIA_DIR, unquote(requested_path)))
+
+    # Ensure requested path stays within MEDIA_DIR
     if not requested_path.startswith(MEDIA_DIR):
         requested_path = MEDIA_DIR  # Reset to base directory if outside allowed path
 
@@ -326,28 +326,29 @@ def list_media():
     try:
         for entry in os.scandir(requested_path):
             if entry.is_dir():
-                # Check if the subfolder contains at least one valid file at any level
                 sub_path = os.path.join(requested_path, entry.name)
                 contains_valid_files = any(
-                    os.path.splitext(f)[1].lower() in ALLOWED_EXTENSIONS for _, _, files in os.walk(sub_path) for f in files
+                    os.path.splitext(f)[1].lower() in ALLOWED_EXTENSIONS 
+                    for _, _, files in os.walk(sub_path) for f in files
                 )
                 if contains_valid_files:
                     subfolders.append(entry.name)
             elif entry.is_file() and os.path.splitext(entry.name)[1].lower() in ALLOWED_EXTENSIONS:
-                media_files.append(os.path.join(requested_path, entry.name))
+                media_files.append(entry.name)  # Append file name, not full path
 
-        # If there is only ONE file and NO subfolders, autoplay the file
+        # ✅ If there is only ONE file and NO subfolders, autoplay the file
         if len(media_files) == 1 and not subfolders:
-            return jsonify({"autoplay": media_files[0]})
+            return jsonify({"autoplay": os.path.join(requested_path, media_files[0])})
 
         return jsonify({
-            "parent": os.path.dirname(requested_path) if requested_path != MEDIA_DIR else None,
+            "parent": os.path.relpath(os.path.dirname(requested_path), MEDIA_DIR) if requested_path != MEDIA_DIR else None,
             "files": media_files,
             "subfolders": subfolders
         })
 
     except Exception as e:
         return jsonify({"error": str(e)})
+
 
 # @app.route('/list_media')
 # def list_media():
