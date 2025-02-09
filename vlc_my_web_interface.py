@@ -15,10 +15,9 @@ from urllib.parse import quote, unquote, urlencode
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-@app.before_request
-def log_request():
-    print(f"Request: {request.method} {request.path} from {request.remote_addr}")
-
+# @app.before_request
+# def log_request():
+#     print(f"Request: {request.method} {request.path} from {request.remote_addr}")
 
 try:
     with open("static/config.json", "r") as f:
@@ -54,26 +53,7 @@ def fetch_vlc_status(): # function that fetches VLC data
         return json_data
     except requests.exceptions.RequestException as e:
         print(f"Error fetching VLC status: {e}")
-        return None
-
-# def update_vlc_status_periodically():
-#     global vlc_status_cache
-#     last_position = None  # Store last known position separately
-#     last_position_update_time = 0  # Store last update timestamp
-#     while True:
-#         vlc_status = fetch_vlc_status()
-
-#         if not vlc_status:
-#             time.sleep(REFRESH_RATE)
-#             print(f"Invalid vlc_status")
-#             continue
-
-#         if vlc_status != vlc_status_cache: # check if it has changed
-#             # print(vlc_status)
-#             vlc_status_cache = vlc_status
-#             if vlc_status:
-#                 broadcast_vlc_status(vlc_status)
-#         time.sleep(REFRESH_RATE)       
+        return None     
 
 vlc_clients = set()  # Set to store connected VLC clients
 vlc_status_cache = None # cache the last status
@@ -85,7 +65,6 @@ def update_vlc_status_periodically():
     global vlc_status_cache
     last_update_time = 0  # Store last update timestamp for ignored keys
     last_rounded_position = None  # Track last rounded position
-
 
     while True:
         vlc_status = fetch_vlc_status()
@@ -130,7 +109,6 @@ def update_vlc_status_periodically():
         # print("should_broadcast_ignored:", should_broadcast_ignored)
         # print("should_broadcast_immediate:", should_broadcast_immediate)
 
-
         if should_broadcast_immediate:
             print(f"Immediate VLC Status Changed: {immediate_keys_changed}")
             vlc_status_cache = vlc_status
@@ -153,7 +131,6 @@ def update_vlc_status_periodically():
         last_rounded_position = rounded_position
 
         time.sleep(REFRESH_RATE)
-
 
 def broadcast_vlc_status(status):
     """Send VLC status updates to all connected clients."""
@@ -191,7 +168,6 @@ def fetch_system_volume():
     except (subprocess.CalledProcessError, ValueError) as e:
         print("Exception occurred:", e)
         return None
-
 
 current_system_volume = fetch_system_volume()
 
@@ -236,7 +212,6 @@ def system_volume():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-
 def broadcast_system_volume(system_volume):
     """Send volume updates to all connected clients."""
     print(f"Broadcasting to {len(clients)} clients: System Volume {system_volume}")
@@ -245,7 +220,6 @@ def broadcast_system_volume(system_volume):
             client.put(system_volume)  # Send the volume to each client
         except Exception:
             clients.remove(client)  # Remove disconnected clients
-
 
 @app.route('/system_volume_updates')
 def system_volume_updates():
@@ -283,38 +257,10 @@ def vlc_status_updates():
     q = queue.Queue()
     return Response(event_stream(q), mimetype="text/event-stream")
 
-
-
 @app.route('/current_system_volume')  # Restored route
 def get_current_volume():
     global current_system_volume
     return jsonify({'system_volume': current_system_volume})
-
-# # polling -> moved to SSE notifications
-# @app.route('/vlc_status')
-# def vlc_status():
-#     try:
-#         response = requests.get(f"{VLC_HOST}/requests/status.xml", auth=('', VLC_PASSWORD))
-#         response.raise_for_status()
-#         xml_data = response.text
-        
-#         # Convert XML to JSON (using xmltodict)
-#         json_data = xmltodict.parse(xml_data)
-#         return jsonify(json_data["root"])  # Return relevant part
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-# @app.route('/vlc_command')
-# def vlc_command():
-#     command = request.args.get('cmd', '')
-#     value = request.args.get('val', '')
-
-#     try:
-#         requests.get(VLC_STATUS_URL, params={"command": command, "val": value}, auth=(VLC_USER, VLC_PASSWORD))
-#         return jsonify({"status": "success"})
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/vlc_command')
 def vlc_command():
@@ -329,7 +275,6 @@ def vlc_command():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/vlc_play')
 def vlc_play():
     """Plays a media file in VLC."""
@@ -339,11 +284,11 @@ def vlc_play():
         return jsonify({"error": "No file path provided"}), 400
 
     # Decode and then re-encode correctly (spaces as %20, but keep slashes)
-    file_path = urllib.parse.unquote(file_path)
-    encoded_path = urllib.parse.quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
+    file_path = unquote(file_path)
+    encoded_path = quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
 
     params = {"command": "in_play", "input": encoded_path}
-    full_url = f"{VLC_STATUS_URL}?{urllib.parse.urlencode(params)}"
+    full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
 
     print(f"Sending VLC play request: {full_url}")
 
@@ -353,37 +298,6 @@ def vlc_play():
         return jsonify({"status": "success", "file": file_path})
     except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
-
-# @app.route('/vlc_command')
-# def vlc_command():
-#     command = request.args.get('cmd', '')
-#     value = request.args.get('val', '')
-
-#     # If command is "in_play", use "input" instead of "val"
-#     params = {"command": command}
-#     if command == "in_play":
-#         value = unquote(value)  # Decode any existing URL encoding
-#         value = quote(value, safe='/:')  # ? Re-encode it correctly (preserving `/` but encoding spaces as `%20`)
-#         params["input"] = value  # VLC expects "input" for in_play
-
-#     else:
-#         params["val"] = value  # Use "val" for all other commands
-
-#     if command == "in_play":
-#         full_url = f"{VLC_STATUS_URL}?command={params['command']}&input={params['input']}"
-#     else:
-#         full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
-
-#     print(f"Sending VLC request: {full_url}")  # ✅ Print the final request URL before sending
-
-#     try:
-# #        response = requests.get(VLC_STATUS_URL, params=params, auth=(VLC_USER, VLC_PASSWORD))
-#         response = requests.get(full_url, auth=(VLC_USER, VLC_PASSWORD))
-#         response.raise_for_status()
-#         return jsonify({"status": "success"})
-#     except requests.exceptions.RequestException as e:
-#         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/config')
 def get_config():
@@ -434,8 +348,6 @@ def list_media():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 @app.route('/browser')
 def browser():
     return render_template("browser.html")
@@ -457,5 +369,5 @@ if __name__ == '__main__':
     vlc_status_thread.start()
     
     print("Flask app is starting...")  # Debug log to confirm startup
-    #app.run(host=FLASK_HOST, port=FLASK_PORT)  # Start Flask server
-    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=True)
+    app.run(host=FLASK_HOST, port=FLASK_PORT)  # Start Flask server
+    #app.run(host=FLASK_HOST, port=FLASK_PORT, debug=True)

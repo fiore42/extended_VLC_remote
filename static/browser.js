@@ -64,13 +64,23 @@ function showNotification(message, isError = false) {
 
 function playInVLC(filePath) {
     fetch(`/vlc_play?file=${encodeURIComponent(filePath)}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error("Server returned an error");
+            return response.json();
+        })
         .then(data => {
             if (data.status === "success") {
                 showNotification(`Now playing: ${filePath}`);
-            } else {
-                showNotification("Failed to play in VLC.", true);
+
+                // ✅ Switch back to VLC Controls
+                document.getElementById("vlcSection").style.display = "block";
+                document.getElementById("browserSection").style.display = "none";
+
+                // ✅ Close menu if open
+                closeMenuFunc();
+                return;
             }
+            throw new Error("Failed to play in VLC.");
         })
         .catch(error => {
             console.error("Error sending file to VLC:", error);
@@ -79,20 +89,34 @@ function playInVLC(filePath) {
 }
 
 // function playInVLC(filePath) {
-//     fetch(`/vlc_command?cmd=in_play&val=${encodeURIComponent(filePath)}`)
-//         .then(response => response.json())
+//     fetch(`/vlc_play?file=${encodeURIComponent(filePath)}`)
+//         .then(response => {
+//             if (!response.ok) {
+//                 throw new Error("Server returned an error"); // Force the catch block to handle this
+//             }
+//             return response.json();
+//         })
 //         .then(data => {
 //             if (data.status === "success") {
 //                 showNotification(`Now playing: ${filePath}`);
-//             } else {
-//                 showNotification("Failed to play in VLC.", true);
+
+//                 // Automatically switch back to VLC Controls
+//                 document.getElementById("vlcSection").style.display = "block";
+//                 document.getElementById("browserSection").style.display = "none";
+
+//                 // Close the menu if it's open
+//                 closeMenuFunc();
+
+//                 return; // ✅ Prevents the error message from appearing
 //             }
+//             throw new Error("Failed to play in VLC."); // ✅ Ensures error handling works properly
 //         })
 //         .catch(error => {
 //             console.error("Error sending file to VLC:", error);
 //             showNotification("Error sending file to VLC.", true);
 //         });
 // }
+
 
 // Load initial media list
 document.addEventListener("DOMContentLoaded", () => fetchMedia());
