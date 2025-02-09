@@ -16,7 +16,7 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 
 @app.before_request
 def log_request():
-    print(f"🔍 Request: {request.method} {request.path} from {request.remote_addr}")
+    print(f"Request: {request.method} {request.path} from {request.remote_addr}")
 
 
 try:
