@@ -168,6 +168,41 @@ function sendVLCCommand(command, value = "") {
         });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const menuButton = document.getElementById("menuButton");
+    const sidebar = document.getElementById("sidebar");
+    const closeMenu = document.getElementById("closeMenu");
+    const showVLC = document.getElementById("showVLC");
+    const showBrowser = document.getElementById("showBrowser");
+
+    const vlcSection = document.getElementById("vlcSection");
+    const browserSection = document.getElementById("browserSection");
+
+    // Toggle menu visibility
+    menuButton.addEventListener("click", () => {
+        sidebar.style.display = "block";
+    });
+
+    closeMenu.addEventListener("click", () => {
+        sidebar.style.display = "none";
+    });
+
+    // Show VLC Controls and hide Browser
+    showVLC.addEventListener("click", () => {
+        vlcSection.style.display = "block";
+        browserSection.style.display = "none";
+        sidebar.style.display = "none"; // Close menu
+    });
+
+    // Show Media Browser and hide VLC Controls
+    showBrowser.addEventListener("click", () => {
+        vlcSection.style.display = "none";
+        browserSection.style.display = "block";
+        sidebar.style.display = "none"; // Close menu
+        fetchMedia(); // Load media files when browsing
+    });
+});
+
 document.getElementById("menuButton").addEventListener("click", function() {
     document.getElementById("sidebar").style.left = "0";
 });

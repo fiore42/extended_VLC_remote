@@ -13,8 +13,12 @@
     <div id="menuButton" class="hamburger">☰</div>
     <div id="sidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" id="closeMenu">&times;</a>
-        <a href="/browser" target="_blank">📂 Browse Files</a>
+        <a href="#" id="showVLC">🎬 VLC Controls</a>
+        <a href="#" id="showBrowser">📂 Browse Files</a>
     </div>
+
+    <!-- VLC Controls Section (Default) -->
+    <section id="vlcSection">
 
     <h1 id="mediaTitle">Media Title</h1>
 
@@ -52,7 +56,16 @@
         <span id="systemValue">100%</span>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </section>
+
+    <!-- Media Browser Section (Hidden by Default) -->
+    <section id="browserSection" style="display: none;">
+        <h1>Media Browser</h1>
+        <ul id="fileList"></ul>
+    </section>
+
+    <script src="{{ url_for('static', filename='vlc.js') }}"></script>
+    <script src="{{ url_for('static', filename='browser.js') }}"></script>
 
 </body>
 </html>

@@ -11,6 +11,7 @@ import os
 import xmltodict
 import json
 import sys
+from urllib.parse import quote, unquote, urlencode
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
@@ -323,12 +324,23 @@ def vlc_command():
     # If command is "in_play", use "input" instead of "val"
     params = {"command": command}
     if command == "in_play":
+        value = unquote(value)  # Decode any existing URL encoding
+        value = quote(value, safe='/:')  # ? Re-encode it correctly (preserving `/` but encoding spaces as `%20`)
         params["input"] = value  # VLC expects "input" for in_play
+
     else:
         params["val"] = value  # Use "val" for all other commands
 
+    if command == "in_play":
+        full_url = f"{VLC_STATUS_URL}?command={params['command']}&input={params['input']}"
+    else:
+        full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
+
+    print(f"Sending VLC request: {full_url}")  # ✅ Print the final request URL before sending
+
     try:
-        response = requests.get(VLC_STATUS_URL, params=params, auth=(VLC_USER, VLC_PASSWORD))
+#        response = requests.get(VLC_STATUS_URL, params=params, auth=(VLC_USER, VLC_PASSWORD))
+        response = requests.get(full_url, auth=(VLC_USER, VLC_PASSWORD))
         response.raise_for_status()
         return jsonify({"status": "success"})
     except requests.exceptions.RequestException as e:
