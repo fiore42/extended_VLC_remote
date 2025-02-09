@@ -11,7 +11,6 @@ import os
 import xmltodict
 import json
 import sys
-import request
 
 @app.before_request
 def log_request():
