@@ -119,7 +119,7 @@ def update_vlc_status_periodically():
 
         elif position_moved:
             # normally we disregard position change, unless it's more than 2%
-            print(f"Position Moved > 2% (Rounded {last_rounded_position} → {rounded_position})")
+            print(f"Position Moved > 2% (Rounded {last_rounded_position} -> {rounded_position})")
             last_rounded_position = rounded_position
             vlc_status_cache = vlc_status
             broadcast_vlc_status(vlc_status)
