@@ -29,11 +29,7 @@ function fetchMedia() {
 }
 
 function playInVLC(filePath) {
-    fetch('/play_media', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ "file": filePath })
-    })
+    fetch(`/vlc_command?cmd=in_play&val=${encodeURIComponent(`file://${filePath}`)}`)
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
@@ -47,3 +43,4 @@ function playInVLC(filePath) {
         alert("Error sending file to VLC.");
     });
 }
+
