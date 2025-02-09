@@ -12,11 +12,12 @@ import xmltodict
 import json
 import sys
 
+app = Flask(__name__, static_folder="static", template_folder="templates")
+
 @app.before_request
 def log_request():
     print(f"🔍 Request: {request.method} {request.path} from {request.remote_addr}")
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
 
 try:
     with open("static/config.json", "r") as f:
