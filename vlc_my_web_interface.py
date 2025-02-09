@@ -287,8 +287,11 @@ def vlc_play():
 
 
     # Decode and then re-encode correctly (spaces as %20, but keep slashes)
-    file_path = unquote(file_path)
+    #file_path = unquote(file_path)
     encoded_path = quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
+
+    print(f"encoded_path: {encoded_path}")
+
 
     params = {"command": "in_play", "input": encoded_path}
     full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
