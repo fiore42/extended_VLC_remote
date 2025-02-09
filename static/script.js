@@ -23,6 +23,28 @@ function applyTheme() {
 applyTheme(); // Apply on load
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme); // Listen for changes
 
+let CONFIG = {}; // Global variable to store config
+
+async function loadConfig() {
+    try {
+        const response = await fetch("/config"); // Fetch from Flask
+        if (!response.ok) throw new Error("Failed to load config");
+        CONFIG = await response.json();
+
+        console.log("✅ Config Loaded:", CONFIG);
+
+        // Example usage
+        const vlcHost = CONFIG.VLC_HOST;
+        console.log("VLC Host:", vlcHost);
+    } catch (error) {
+        console.error("⚠️ Error loading config:", error);
+    }
+}
+
+// Call function on page load
+loadConfig();
+
+
 checkScreenSize();
 window.addEventListener('resize', checkScreenSize);
 
@@ -112,7 +134,7 @@ function processVLCStatus(data) {
     document.getElementById('seekSlider').value = data.position * 100;
     document.getElementById('seekValue').textContent = `${Math.round(data.position * 100)}%`;
     // Scale VLC volume (0-512) to slider range (0-100)
-    const scaledVolume = Math.round((data.volume / 512) * 100);
+    const scaledVolume = Math.round((data.volume / ${CONFIG.MAX_VLC_VOLUME}) * 100);
     document.getElementById('vlcVolume').value = scaledVolume;
     document.getElementById('vlcValue').textContent = `${scaledVolume}%`;
     document.getElementById('playPause').textContent = data.state === "playing" ? "⏸️ Pause" : "▶️ Play";
@@ -186,7 +208,7 @@ document.getElementById('seekSlider').addEventListener('change', (e) => {
 
 document.getElementById('vlcVolume').addEventListener('input', (e) => {
     const volumePercentage = e.target.value / 100; // Convert slider value (0-100) to 0.0-1.0 range
-    const vlcVolume = Math.round(512 * volumePercentage); // Scale to 0-512 and round to nearest integer
+    const vlcVolume = Math.round(${CONFIG.MAX_VLC_VOLUME} * volumePercentage); // Scale to 0-512 and round to nearest integer
     sendVLCCommand("volume", vlcVolume); // Send the scaled volume to VLC
 });
 
