@@ -344,7 +344,7 @@ ALLOWED_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
 
 @app.route('/list_media')
 def list_media():
-    """Lists valid video files & first-level subfolders in a given directory."""
+    """Lists valid video files & non-empty subfolders recursively."""
     requested_path = request.args.get("path", MEDIA_DIR)  # Get requested path
 
     # Ensure path is inside MEDIA_DIR
@@ -352,21 +352,20 @@ def list_media():
         requested_path = MEDIA_DIR
 
     media_files = []
-    subfolders = []
+    subfolders = set()  # Use a set to avoid duplicate folders
 
-    # Scan directory
+    # Scan directory recursively to detect valid files
     try:
-        for entry in os.scandir(requested_path):
-            if entry.is_dir():  # If it's a folder, check if it contains valid files
-                sub_path = os.path.join(requested_path, entry.name)
-                if any(
-                    os.path.splitext(file)[1].lower() in ALLOWED_EXTENSIONS
-                    for file in os.listdir(sub_path)
-                ):
-                    subfolders.append(entry.name)
-            elif entry.is_file():  # If it's a file, check if it's a valid video file
-                if os.path.splitext(entry.name)[1].lower() in ALLOWED_EXTENSIONS:
-                    media_files.append(entry.name)
+        for root, dirs, files in os.walk(requested_path):
+            # Add valid video files
+            for file in files:
+                if os.path.splitext(file)[1].lower() in ALLOWED_EXTENSIONS:
+                    media_files.append(os.path.join(root, file))
+
+                    # Add all ancestor folders up to requested_path
+                    rel_path = os.path.relpath(root, requested_path)
+                    if rel_path != ".":
+                        subfolders.add(rel_path.split(os.sep)[0])  # Only include first-level folders
 
         response = {
             "current_path": requested_path,
@@ -382,6 +381,7 @@ def list_media():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/browser')
 def browser():
