@@ -31,6 +31,15 @@ function fetchMedia(path = "") {
                 fileList.appendChild(folderItem);
             });
 
+            // Playable Subfolders
+            data.playable_folders.forEach(playable_folders => {
+                const folderItem = document.createElement("li");
+                folderItem.textContent = `📁 ${playable_folders}`;
+                folderItem.style.cursor = "pointer";
+                folderItem.onclick = () => playInVLC(`${data.current_path}/${playable_folders}`);
+                fileList.appendChild(folderItem);
+            });
+
             // Video files
             data.files.forEach(file => {
                 const fileItem = document.createElement("li");
