@@ -20,7 +20,7 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 #     print(f"Request: {request.method} {request.path} from {request.remote_addr}")
 
 # Load config.json
-CONFIG_FILE = "config.json"
+CONFIG_FILE = "static/config.json"
 
 try:
     with open(CONFIG_FILE, "r") as f:
@@ -30,7 +30,7 @@ except FileNotFoundError:
     print(f"ERROR: Config file {CONFIG_FILE} not found.", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 except json.JSONDecodeError:
-    print("ERROR: Config file 'static/config.json' is not a valid JSON file.", file=sys.stderr)
+    print(f"ERROR: Config file {CONFIG_FILE} is not a valid JSON file.", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 except Exception as e:
     print(f"ERROR: Unexpected error loading config: {e}", file=sys.stderr)
