@@ -27,7 +27,7 @@ try:
         config = json.load(f)
     print("Config loaded successfully.")
 except FileNotFoundError:
-    print("ERROR: Config file 'static/config.json' not found.", file=sys.stderr)
+    print(f"ERROR: Config file {CONFIG_FILE} not found.", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 except json.JSONDecodeError:
     print("ERROR: Config file 'static/config.json' is not a valid JSON file.", file=sys.stderr)
