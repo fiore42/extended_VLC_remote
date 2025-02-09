@@ -55,7 +55,9 @@ DEFAULTS = {
     "DISPLAY": ":0",
     "VLC_HOST": "127.0.0.1",
     "VLC_ADDR": "localhost",
-    "VLC_USER": ""
+    "VLC_USER": "",
+    "VLC_XML": "/requests/status.xml"
+
 }
 
 # Apply defaults for optional keys
@@ -75,7 +77,8 @@ try:
     VLC_PORT = int(config["VLC_PORT"])
     VLC_ADDR = config["VLC_ADDR"]
     VLC_USER = config["VLC_USER"]
-    VLC_PASSWORD = config["VLC_PWD"] 
+    VLC_PASSWORD = config["VLC_PWD"]
+    VLC_XML = config["VLC_XML"]
 except ValueError as e:
     sys.exit(f"Error: Invalid numeric value in configuration: {e}")
 
@@ -84,7 +87,7 @@ print(f"Final Config Values:\n{json.dumps(config, indent=2)}")
 
 VLC_URL = f"http://{VLC_ADDR}:{VLC_PORT}"
 
-VLC_STATUS_URL = f"{VLC_URL}/requests/status.xml"
+VLC_STATUS_URL = f"{VLC_URL}{VLC_XML}"
 
 def fetch_vlc_status(): # function that fetches VLC data
     try:

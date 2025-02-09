@@ -17,6 +17,7 @@
   "VLC_USER": "",
   "_comment": "VLC_PASSWORD: this config file will be available on http://<<host>>:<<FLASK_PORT>>/config move your password inside python if you want more security",
   "VLC_PWD": "password",
+  "VLC_XML": "/requests/status.xml",
   "_comment": "leave next empty",
   "_comment": ""
 }
