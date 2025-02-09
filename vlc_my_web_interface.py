@@ -331,6 +331,9 @@ def list_media():
 
     return jsonify({"files": media_files})
 
+@app.route('/browser')
+def browser():
+    return render_template("browser.html")
 
 @app.route('/')
 def index():
