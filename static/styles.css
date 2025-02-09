@@ -35,7 +35,7 @@ body {
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
-    background: #ddd;
+    background: var(--text-color);
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -43,7 +43,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-track {
-    background: #ddd;
+    background: var(--text-color);
 }
 
 input[type="range"]::-moz-range-thumb {
