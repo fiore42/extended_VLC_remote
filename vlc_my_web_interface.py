@@ -470,7 +470,7 @@ def start_vlc():
 
     def run_vlc():
         os.environ["DISPLAY"] = config["DISPLAY"]  # Ensure DISPLAY is set
-        cmd = f'{VLC_BIN} --http-password {VLC_PWD} --http-host={VLC_HOST} --http-port={VLC_PORT}'
+        cmd = f'{VLC_BIN} --http-password {VLC_PASSWORD} --http-host={VLC_HOST} --http-port={VLC_PORT}'
         subprocess.Popen(shlex.split(cmd), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print("VLC started.")
 
