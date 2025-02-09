@@ -14,7 +14,7 @@ import json
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
 
-with open("config.json", "r") as f:
+with open("static/config.json", "r") as f:
     config = json.load(f)
 
 VLC_HOST = config["VLC_HOST"]

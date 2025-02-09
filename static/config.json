@@ -1,6 +1,7 @@
 {
   "VLC_HOST": "http://localhost:8090",
   "VLC_USER": "",
+  "_comment": "this config is available on http://localhost:5000/config move your password to python if you want more security",
   "VLC_PASSWORD": "password",
   "FLASK_HOST": "0.0.0.0",
   "FLASK_PORT": 5000,
