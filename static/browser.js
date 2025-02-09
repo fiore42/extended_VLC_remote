@@ -1,56 +1,10 @@
-// function fetchMedia(path = "") {
-//     const url = path ? `/list_media?path=${encodeURIComponent(path)}` : "/list_media";
+function fetchMedia(path = "") {
+    const url = path ? `/list_media?path=${encodeURIComponent(path)}` : "/list_media";
 
-//     fetch(url)
-//         .then(response => response.json())
-//         .then(data => {
-//             const fileList = document.getElementById("fileList");
-//             fileList.innerHTML = ""; // Clear previous entries
-
-//             if (data.error) {
-//                 fileList.innerHTML = `<li style="color:red;">${data.error}</li>`;
-//                 return;
-//             }
-
-//             // Parent folder link (if applicable)
-//             if (data.parent) {
-//                 const parentItem = document.createElement("li");
-//                 parentItem.textContent = "📁 << Parent Folder >>";
-//                 parentItem.style.cursor = "pointer";
-//                 parentItem.style.fontWeight = "bold";
-//                 parentItem.onclick = () => fetchMedia(data.parent);
-//                 fileList.appendChild(parentItem);
-//             }
-
-//             // Subfolders
-//             data.folders.forEach(folder => {
-//                 const folderItem = document.createElement("li");
-//                 folderItem.textContent = `📁 ${folder}`;
-//                 folderItem.style.cursor = "pointer";
-//                 folderItem.onclick = () => fetchMedia(`${data.current_path}/${folder}`);
-//                 fileList.appendChild(folderItem);
-//             });
-
-//             // Video files
-//             data.files.forEach(file => {
-//                 const fileItem = document.createElement("li");
-//                 fileItem.textContent = `🎬 ${file}`;
-//                 fileItem.style.cursor = "pointer";
-//                 fileItem.onclick = () => playInVLC(`${data.current_path}/${file}`);
-//                 fileList.appendChild(fileItem);
-//             });
-//         })
-//         .catch(error => {
-//             console.error("Error fetching media:", error);
-//             fileList.innerHTML = `<li style="color:red;">Failed to load media files.</li>`;
-//         });
-// }
-
-function fetchMedia(directory = "") {
-    fetch(`/list_media?path=${encodeURIComponent(directory)}`)
+    fetch(url)
         .then(response => response.json())
         .then(data => {
-            const fileList = document.getElementById('fileList');
+            const fileList = document.getElementById("fileList");
             fileList.innerHTML = ""; // Clear previous entries
 
             if (data.error) {
@@ -58,39 +12,32 @@ function fetchMedia(directory = "") {
                 return;
             }
 
-            // If a folder contains only ONE valid file, play it immediately
-            if (data.files.length === 1 && data.subfolders.length === 0) {
-                playInVLC(data.files[0]); // ✅ Auto-play single file
-                return;
-            }
-
-            // Add << parent folder >> option (if applicable)
+            // Parent folder link (if applicable)
             if (data.parent) {
                 const parentItem = document.createElement("li");
-                parentItem.textContent = "📁 .. (Parent Folder)";
-                parentItem.style.fontWeight = "bold";
+                parentItem.textContent = "📁 << Parent Folder >>";
                 parentItem.style.cursor = "pointer";
+                parentItem.style.fontWeight = "bold";
                 parentItem.onclick = () => fetchMedia(data.parent);
                 fileList.appendChild(parentItem);
             }
 
-            // Add subfolders
-            data.subfolders.forEach(folder => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `📁 ${folder}`;
-                listItem.style.fontWeight = "bold";
-                listItem.style.cursor = "pointer";
-                listItem.onclick = () => fetchMedia(directory + "/" + folder); // Navigate into folder
-                fileList.appendChild(listItem);
+            // Subfolders
+            data.folders.forEach(folder => {
+                const folderItem = document.createElement("li");
+                folderItem.textContent = `📁 ${folder}`;
+                folderItem.style.cursor = "pointer";
+                folderItem.onclick = () => fetchMedia(`${data.current_path}/${folder}`);
+                fileList.appendChild(folderItem);
             });
 
-            // Add valid media files
+            // Video files
             data.files.forEach(file => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `🎬 ${file}`;
-                listItem.style.cursor = "pointer";
-                listItem.onclick = () => playInVLC(file);
-                fileList.appendChild(listItem);
+                const fileItem = document.createElement("li");
+                fileItem.textContent = `🎬 ${file}`;
+                fileItem.style.cursor = "pointer";
+                fileItem.onclick = () => playInVLC(`${data.current_path}/${file}`);
+                fileList.appendChild(fileItem);
             });
         })
         .catch(error => {
@@ -98,6 +45,59 @@ function fetchMedia(directory = "") {
             fileList.innerHTML = `<li style="color:red;">Failed to load media files.</li>`;
         });
 }
+
+// function fetchMedia(directory = "") {
+//     fetch(`/list_media?path=${encodeURIComponent(directory)}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             const fileList = document.getElementById('fileList');
+//             fileList.innerHTML = ""; // Clear previous entries
+
+//             if (data.error) {
+//                 fileList.innerHTML = `<li style="color:red;">${data.error}</li>`;
+//                 return;
+//             }
+
+//             // If a folder contains only ONE valid file, play it immediately
+//             if (data.files.length === 1 && data.subfolders.length === 0) {
+//                 playInVLC(data.files[0]); // ✅ Auto-play single file
+//                 return;
+//             }
+
+//             // Add << parent folder >> option (if applicable)
+//             if (data.parent) {
+//                 const parentItem = document.createElement("li");
+//                 parentItem.textContent = "📁 .. (Parent Folder)";
+//                 parentItem.style.fontWeight = "bold";
+//                 parentItem.style.cursor = "pointer";
+//                 parentItem.onclick = () => fetchMedia(data.parent);
+//                 fileList.appendChild(parentItem);
+//             }
+
+//             // Add subfolders
+//             data.subfolders.forEach(folder => {
+//                 const listItem = document.createElement("li");
+//                 listItem.textContent = `📁 ${folder}`;
+//                 listItem.style.fontWeight = "bold";
+//                 listItem.style.cursor = "pointer";
+//                 listItem.onclick = () => fetchMedia(directory + "/" + folder); // Navigate into folder
+//                 fileList.appendChild(listItem);
+//             });
+
+//             // Add valid media files
+//             data.files.forEach(file => {
+//                 const listItem = document.createElement("li");
+//                 listItem.textContent = `🎬 ${file}`;
+//                 listItem.style.cursor = "pointer";
+//                 listItem.onclick = () => playInVLC(file);
+//                 fileList.appendChild(listItem);
+//             });
+//         })
+//         .catch(error => {
+//             console.error("Error fetching media:", error);
+//             fileList.innerHTML = `<li style="color:red;">Failed to load media files.</li>`;
+//         });
+// }
 
 
 /* Function to show a temporary notification */

@@ -308,79 +308,52 @@ def get_config():
 
 ALLOWED_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
 
-# @app.route('/list_media')
-# def list_media():
-#     """Lists video files in the requested folder. 
-#     If a folder contains only one valid file, return it for autoplay.
-#     """
-#     requested_path = request.args.get('path', MEDIA_DIR)
-#     requested_path = os.path.abspath(os.path.join(MEDIA_DIR, unquote(requested_path)))
-
-#     # Ensure requested path stays within MEDIA_DIR
-#     if not requested_path.startswith(MEDIA_DIR):
-#         requested_path = MEDIA_DIR  # Reset to base directory if outside allowed path
-
-#     media_files = []
-#     subfolders = []
-
-#     try:
-#         for entry in os.scandir(requested_path):
-#             if entry.is_dir():
-#                 sub_path = os.path.join(requested_path, entry.name)
-#                 contains_valid_files = any(
-#                     os.path.splitext(f)[1].lower() in ALLOWED_EXTENSIONS 
-#                     for _, _, files in os.walk(sub_path) for f in files
-#                 )
-#                 if contains_valid_files:
-#                     subfolders.append(entry.name)
-#             elif entry.is_file() and os.path.splitext(entry.name)[1].lower() in ALLOWED_EXTENSIONS:
-#                 media_files.append(entry.name)  # Append file name, not full path
-
-#         # ✅ If there is only ONE file and NO subfolders, autoplay the file
-#         if len(media_files) == 1 and not subfolders:
-#             return jsonify({"autoplay": os.path.join(requested_path, media_files[0])})
-
-#         return jsonify({
-#             "parent": os.path.relpath(os.path.dirname(requested_path), MEDIA_DIR) if requested_path != MEDIA_DIR else None,
-#             "files": media_files,
-#             "subfolders": subfolders
-#         })
-
-#     except Exception as e:
-#         return jsonify({"error": str(e)})
-
-
 @app.route('/list_media')
 def list_media():
-    """List only files in the requested path & only subfolders containing valid files at any level."""
-    requested_path = request.args.get("path", MEDIA_DIR)  # Default to MEDIA_DIR
+    """Lists video files in the requested path & classifies folders as playable or normal."""
+    requested_path = request.args.get("path", MEDIA_DIR)
+    requested_path = os.path.abspath(os.path.join(MEDIA_DIR, unquote(requested_path)))
 
     # Ensure security: restrict to MEDIA_DIR and prevent path traversal
     if not requested_path.startswith(MEDIA_DIR):
         requested_path = MEDIA_DIR
 
     media_files = []
-    valid_subfolders = set()  # To store only subfolders that contain valid files
+    folders = set()  # Regular folders (contain multiple playable files)
+    playable_folders = set()  # ✅ Folders with exactly ONE playable file
+
+    def get_valid_files(folder_path):
+        """Recursively collect all valid media files inside a folder."""
+        valid_files = []
+        for root, _, files in os.walk(folder_path):
+            for file in files:
+                if os.path.splitext(file)[1].lower() in ALLOWED_EXTENSIONS:
+                    valid_files.append(os.path.join(root, file))  # Store full path
+        return valid_files
 
     try:
         # Scan the **requested_path only** for files
         for entry in os.scandir(requested_path):
             if entry.is_file() and os.path.splitext(entry.name)[1].lower() in ALLOWED_EXTENSIONS:
-                media_files.append(entry.name)  # Store file names (not full path)
+                media_files.append(entry.name)  # Store only file names
 
-        # Recursively check subfolders to see if they contain valid files
-        for root, dirs, files in os.walk(requested_path):
-            for file in files:
-                if os.path.splitext(file)[1].lower() in ALLOWED_EXTENSIONS:
-                    rel_path = os.path.relpath(root, requested_path)  # Get relative path from requested_path
-                    if rel_path != ".":
-                        valid_subfolders.add(rel_path.split(os.sep)[0])  # Store only first-level subfolder
-                    break  # Stop scanning this subfolder once a valid file is found
+        # Scan **only direct subfolders** of requested_path
+        for entry in os.scandir(requested_path):
+            if entry.is_dir():
+                sub_path = os.path.join(requested_path, entry.name)
+                valid_files = get_valid_files(sub_path)  # Get all playable files inside
+
+                if valid_files:
+                    if len(valid_files) == 1:  # ✅ Exactly ONE playable file
+                        playable_folders.add(entry.name)
+                    else:  # ✅ More than one playable file
+                        folders.add(entry.name)
 
         response = {
             "current_path": requested_path,
-            "folders": sorted(valid_subfolders),  # Show only first-level folders
-            "files": sorted(media_files)  # Show only files in requested_path
+            "folders": sorted(folders),  # ✅ Regular folders (contain multiple playable files)
+            "playable_folders": sorted(playable_folders),  # ✅ Folders with ONE playable file
+            "files": sorted(media_files)  # ✅ Files only in `requested_path`
         }
 
         # Add parent folder navigation if not in MEDIA_DIR
@@ -391,6 +364,50 @@ def list_media():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+# @app.route('/list_media')
+# def list_media():
+#     """List only files in the requested path & only subfolders containing valid files at any level."""
+#     requested_path = request.args.get("path", MEDIA_DIR)  # Default to MEDIA_DIR
+
+#     # Ensure security: restrict to MEDIA_DIR and prevent path traversal
+#     if not requested_path.startswith(MEDIA_DIR):
+#         requested_path = MEDIA_DIR
+
+#     media_files = []
+#     valid_subfolders = set()  # To store only subfolders that contain valid files
+
+#     try:
+#         # Scan the **requested_path only** for files
+#         for entry in os.scandir(requested_path):
+#             if entry.is_file() and os.path.splitext(entry.name)[1].lower() in ALLOWED_EXTENSIONS:
+#                 media_files.append(entry.name)  # Store file names (not full path)
+
+        # # Recursively check subfolders to see if they contain valid files
+        # for root, dirs, files in os.walk(requested_path):
+        #     for file in files:
+        #         if os.path.splitext(file)[1].lower() in ALLOWED_EXTENSIONS:
+        #             rel_path = os.path.relpath(root, requested_path)  # Get relative path from requested_path
+        #             if rel_path != ".":
+        #                 valid_subfolders.add(rel_path.split(os.sep)[0])  # Store only first-level subfolder
+        #             break  # Stop scanning this subfolder once a valid file is found
+
+#         response = {
+#             "current_path": requested_path,
+#             "folders": sorted(valid_subfolders),  # Show only first-level folders
+#             "files": sorted(media_files)  # Show only files in requested_path
+#         }
+
+#         # Add parent folder navigation if not in MEDIA_DIR
+#         if requested_path != MEDIA_DIR:
+#             response["parent"] = os.path.dirname(requested_path)
+
+#         return jsonify(response)
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 @app.route('/browser')
 def browser():
