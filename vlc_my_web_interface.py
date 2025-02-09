@@ -37,9 +37,6 @@ MAX_VLC_VOLUME = int(config["MAX_VLC_VOLUME"])
 REFRESH_RATE = int(config["REFRESH_RATE"])
 
 
-vlc_clients = set()  # Set to store connected VLC clients
-vlc_status_cache = None # cache the last status
-
 def fetch_vlc_status(): # function that fetches VLC data
     try:
         response = requests.get(f"{VLC_HOST}/requests/status.xml", auth=(VLC_USER, VLC_PASSWORD))
@@ -69,6 +66,9 @@ def fetch_vlc_status(): # function that fetches VLC data
 #             if vlc_status:
 #                 broadcast_vlc_status(vlc_status)
 #         time.sleep(REFRESH_RATE)       
+
+vlc_clients = set()  # Set to store connected VLC clients
+vlc_status_cache = None # cache the last status
 
 # Define the set of ignored keys that should only be updated every 60 seconds
 IGNORED_KEYS = {'time', 'position', 'stats'}
@@ -259,6 +259,11 @@ def vlc_status_updates():
     """SSE endpoint for VLC status updates."""
     def event_stream(q):
         vlc_clients.add(q)
+
+        # Send the last known VLC status immediately when a client connects
+        if vlc_status_cache:
+            q.put(json.dumps(vlc_status_cache))  # Convert to JSON string and send
+
         try:
             while True:
                 status = q.get()
