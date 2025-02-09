@@ -19,8 +19,11 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 # def log_request():
 #     print(f"Request: {request.method} {request.path} from {request.remote_addr}")
 
+# Load config.json
+CONFIG_FILE = "config.json"
+
 try:
-    with open("static/config.json", "r") as f:
+    with open(CONFIG_FILE, "r") as f:
         config = json.load(f)
     print("Config loaded successfully.")
 except FileNotFoundError:
@@ -33,16 +36,38 @@ except Exception as e:
     print(f"ERROR: Unexpected error loading config: {e}", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 
-VLC_HOST = config["VLC_HOST"]
-VLC_USER = config["VLC_USER"]
-VLC_PASSWORD = config["VLC_PASSWORD"]
-FLASK_HOST = config["FLASK_HOST"]
-FLASK_PORT = int(config["FLASK_PORT"])
-MAX_VLC_VOLUME = int(config["MAX_VLC_VOLUME"])
-REFRESH_RATE = int(config["REFRESH_RATE"])
-MEDIA_DIR = config["MEDIA_DIR"]
+# List of required keys
+REQUIRED_KEYS = [
+    "FLASK_HOST", "FLASK_PORT", "MAX_VLC_VOLUME", "REFRESH_RATE", 
+    "MEDIA_DIR", "VLC_BIN", "DISPLAY", "VLC_HOST", "VLC_PORT", 
+    "VLC_ADDR", "VLC_USER", "VLC_PASSWORD"
+]
 
-VLC_STATUS_URL = f"{VLC_HOST}/requests/status.xml"
+# Validate presence and non-emptiness
+for key in REQUIRED_KEYS:
+    if key not in config or config[key] == "":
+        sys.exit(f"Error: Missing or empty required configuration key: {key}")
+
+# Convert necessary values to the correct type
+try:
+    FLASK_HOST = config["FLASK_HOST"]
+    FLASK_PORT = int(config["FLASK_PORT"])
+    MAX_VLC_VOLUME = int(config["MAX_VLC_VOLUME"])
+    REFRESH_RATE = int(config["REFRESH_RATE"])
+    MEDIA_DIR = config["MEDIA_DIR"]
+    VLC_BIN = config["VLC_BIN"]
+    DISPLAY = config["DISPLAY"]
+    VLC_HOST = config["VLC_HOST"]
+    VLC_PORT = int(config["VLC_PORT"])
+    VLC_ADDR = config["VLC_ADDR"]
+    VLC_USER = config["VLC_USER"]
+    VLC_PWD = config["VLC_PASSWORD"] 
+except ValueError as e:
+    sys.exit(f"Error: Invalid numeric value in configuration: {e}")
+
+VLC_URL = f"http://{VLC_ADDR}:{VLC_PORT}"
+
+VLC_STATUS_URL = f"{VLC_URL}/requests/status.xml"
 
 def fetch_vlc_status(): # function that fetches VLC data
     try:
@@ -268,9 +293,7 @@ def vlc_command():
     value = request.args.get('val', '')
 
     try:
-        requests.get(f"{VLC_HOST}/requests/status.xml", 
-                     params={"command": command, "val": value},
-                     auth=('', VLC_PASSWORD))
+        requests.get(VLC_STATUS_URL, params={"command": command, "val": value}, auth=(VLC_USER, VLC_PASSWORD))
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -415,9 +438,33 @@ def browser():
 
 @app.route('/')
 def index():
-    return render_template("index.html")       
+    return render_template("index.html")
+
+def start_vlc():
+    """Starts VLC in a new thread if it's not running."""
+    print("🟡 Checking if VLC is running...")
+    try:
+        response = requests.get(VLC_STATUS_URL, auth=(VLC_USER, VLC_PASSWORD), timeout=2)
+        if response.status_code == 200:
+            print("✅ VLC is already running.")
+            return  # VLC is already running
+    except requests.exceptions.RequestException:
+        print("❌ VLC is not running. Starting VLC...")
+
+    def run_vlc():
+        os.environ["DISPLAY"] = config["DISPLAY"]  # Ensure DISPLAY is set
+        cmd = f'{VLC_BIN} --http-password {VLC_PWD} --http-host={VLC_HOST} --http-port={VLC_PORT}'
+        subprocess.Popen(shlex.split(cmd), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print("✅ VLC started.")
+
+    # Start VLC in a separate thread
+    threading.Thread(target=run_vlc, daemon=True).start()
+
 
 if __name__ == '__main__':
+
+    start_vlc() # Ensure VLC starts if not already running
+
     # Ensure volume_queue is initialized before starting the thread
     volume_queue = queue.Queue()
 

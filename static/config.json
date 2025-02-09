@@ -1,12 +1,19 @@
 {
-  "VLC_HOST": "http://localhost:8090",
-  "VLC_USER": "",
-  "_comment": "this config is available on http://localhost:5000/config move your password to python if you want more security",
-  "VLC_PASSWORD": "password",
   "FLASK_HOST": "0.0.0.0",
   "FLASK_PORT": 5000,
   "MAX_VLC_VOLUME": 512,
   "_comment": "REFRESH_RATE: how many seconds between checks on the server side for updates",
   "REFRESH_RATE": 1,
-  "MEDIA_DIR": "/data"
+  "MEDIA_DIR": "/data",
+  "VLC_BIN": "/usr/bin/vlc",
+  "DISPLAY": ":0",
+  "_comment": "VLC_HOST: if flask and vlc run on the same machine, you can set 127.0.0.1 to block direct vlc web access",
+  "_comment": "VLC_HOST: otherwise use 0.0.0.0",
+  "VLC_HOST": "127.0.0.1",
+  "_comment": "VLC_ADDR: should be localhost if flask and vlc run on the same host, or the IP of the vlc host e.g. 192.168.0.10 or pi.local",
+  "VLC_ADDR": "localhost",
+  "_comment": "VLC_USER: I think this should always be empty but I'm not sure...",
+  "VLC_USER": "",
+  "_comment": "VLC_PASSWORD: this config file will be available on http://<<host>>:<<FLASK_PORT>>/config move your password inside python if you want more security",
+  "VLC_PWD": "password"
 }
