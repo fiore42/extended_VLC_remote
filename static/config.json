@@ -10,7 +10,6 @@
   "_comment": "VLC_HOST: if flask and vlc run on the same machine, you can set 127.0.0.1 to block direct vlc web access",
   "_comment": "VLC_HOST: otherwise use 0.0.0.0",
   "VLC_HOST": "127.0.0.1",
-  "VLC_HOST": "0.0.0.0",
   "VLC_PORT": 8090,
   "_comment": "VLC_ADDR: should be localhost if flask and vlc run on the same host, or the IP of the vlc host e.g. 192.168.0.10 or pi.local",
   "VLC_ADDR": "localhost",
