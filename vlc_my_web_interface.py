@@ -17,15 +17,15 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 try:
     with open("static/config.json", "r") as f:
         config = json.load(f)
-    print("✅ Config loaded successfully.")
+    print("Config loaded successfully.")
 except FileNotFoundError:
-    print("❌ ERROR: Config file 'static/config.json' not found.", file=sys.stderr)
+    print("ERROR: Config file 'static/config.json' not found.", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 except json.JSONDecodeError:
-    print("❌ ERROR: Config file 'static/config.json' is not a valid JSON file.", file=sys.stderr)
+    print("ERROR: Config file 'static/config.json' is not a valid JSON file.", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 except Exception as e:
-    print(f"❌ ERROR: Unexpected error loading config: {e}", file=sys.stderr)
+    print(f"ERROR: Unexpected error loading config: {e}", file=sys.stderr)
     sys.exit(1)  # Exit with error code 1
 
 VLC_HOST = config["VLC_HOST"]
