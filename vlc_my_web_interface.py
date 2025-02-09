@@ -369,6 +369,7 @@ def list_media():
     requested_path = request.args.get("path")
 
     print(f"LAST_OPENED: {LAST_OPENED}")  # Debugging output
+    print(f"last_opened_folder: {last_opened_folder}")  # Debugging output
     print(f"requested_path: {requested_path}")  # Debugging output
 
     # If LAST_OPENED is enabled and no specific path is requested, use the last folder browsed
@@ -419,6 +420,10 @@ def list_media():
             "playable_folders": sorted(playable_folders),  # ✅ Folders with ONE playable file
             "files": sorted(media_files)  # ✅ Files only in `requested_path`
         }
+
+        # Update last opened folder (but only if browsing a folder, not playing a file)
+        if requested_path != MEDIA_DIR:
+            last_opened_folder = requested_path
 
         # Add parent folder navigation if not in MEDIA_DIR
         if requested_path != MEDIA_DIR:
