@@ -283,6 +283,9 @@ def vlc_play():
     if not file_path:
         return jsonify({"error": "No file path provided"}), 400
 
+    print(f"file_path: {file_path}")
+
+
     # Decode and then re-encode correctly (spaces as %20, but keep slashes)
     file_path = unquote(file_path)
     encoded_path = quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
