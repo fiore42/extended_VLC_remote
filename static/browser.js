@@ -46,21 +46,53 @@ function fetchMedia(path = "") {
         });
 }
 
+/* Function to show a temporary notification */
+function showNotification(message, isError = false) {
+    const notification = document.createElement("div");
+    notification.textContent = message;
+    notification.className = "notification";
+    if (isError) {
+        notification.classList.add("error");  // Add an error class if it's an error
+    }
+    document.body.appendChild(notification);
+
+    // Automatically remove after 1 second
+    setTimeout(() => {
+        notification.remove();
+    }, 1000);
+}
+
 function playInVLC(filePath) {
-    fetch(`/vlc_command?cmd=in_play&val=${encodeURIComponent(filePath)}`)
+    fetch(`/vlc_play?file=${encodeURIComponent(filePath)}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                alert(`Now playing: ${filePath}`);
+                showNotification(`Now playing: ${filePath}`);
             } else {
-                alert("Failed to play in VLC.");
+                showNotification("Failed to play in VLC.", true);
             }
         })
         .catch(error => {
             console.error("Error sending file to VLC:", error);
-            alert("Error sending file to VLC.");
+            showNotification("Error sending file to VLC.", true);
         });
 }
+
+// function playInVLC(filePath) {
+//     fetch(`/vlc_command?cmd=in_play&val=${encodeURIComponent(filePath)}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.status === "success") {
+//                 showNotification(`Now playing: ${filePath}`);
+//             } else {
+//                 showNotification("Failed to play in VLC.", true);
+//             }
+//         })
+//         .catch(error => {
+//             console.error("Error sending file to VLC:", error);
+//             showNotification("Error sending file to VLC.", true);
+//         });
+// }
 
 // Load initial media list
 document.addEventListener("DOMContentLoaded", () => fetchMedia());

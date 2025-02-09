@@ -321,30 +321,68 @@ def vlc_command():
     command = request.args.get('cmd', '')
     value = request.args.get('val', '')
 
-    # If command is "in_play", use "input" instead of "val"
-    params = {"command": command}
-    if command == "in_play":
-        value = unquote(value)  # Decode any existing URL encoding
-        value = quote(value, safe='/:')  # ? Re-encode it correctly (preserving `/` but encoding spaces as `%20`)
-        params["input"] = value  # VLC expects "input" for in_play
+    try:
+        requests.get(f"{VLC_HOST}/requests/status.xml", 
+                     params={"command": command, "val": value},
+                     auth=('', VLC_PASSWORD))
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    else:
-        params["val"] = value  # Use "val" for all other commands
 
-    if command == "in_play":
-        full_url = f"{VLC_STATUS_URL}?command={params['command']}&input={params['input']}"
-    else:
-        full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
+@app.route('/vlc_play')
+def vlc_play():
+    """Plays a media file in VLC."""
+    file_path = request.args.get('file', '')
 
-    print(f"Sending VLC request: {full_url}")  # ✅ Print the final request URL before sending
+    if not file_path:
+        return jsonify({"error": "No file path provided"}), 400
+
+    # Decode and then re-encode correctly (spaces as %20, but keep slashes)
+    file_path = urllib.parse.unquote(file_path)
+    encoded_path = urllib.parse.quote(file_path, safe='/:')  # Keeps '/' but encodes spaces
+
+    params = {"command": "in_play", "input": encoded_path}
+    full_url = f"{VLC_STATUS_URL}?{urllib.parse.urlencode(params)}"
+
+    print(f"Sending VLC play request: {full_url}")
 
     try:
-#        response = requests.get(VLC_STATUS_URL, params=params, auth=(VLC_USER, VLC_PASSWORD))
         response = requests.get(full_url, auth=(VLC_USER, VLC_PASSWORD))
         response.raise_for_status()
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "file": file_path})
     except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
+
+# @app.route('/vlc_command')
+# def vlc_command():
+#     command = request.args.get('cmd', '')
+#     value = request.args.get('val', '')
+
+#     # If command is "in_play", use "input" instead of "val"
+#     params = {"command": command}
+#     if command == "in_play":
+#         value = unquote(value)  # Decode any existing URL encoding
+#         value = quote(value, safe='/:')  # ? Re-encode it correctly (preserving `/` but encoding spaces as `%20`)
+#         params["input"] = value  # VLC expects "input" for in_play
+
+#     else:
+#         params["val"] = value  # Use "val" for all other commands
+
+#     if command == "in_play":
+#         full_url = f"{VLC_STATUS_URL}?command={params['command']}&input={params['input']}"
+#     else:
+#         full_url = f"{VLC_STATUS_URL}?{urlencode(params)}"
+
+#     print(f"Sending VLC request: {full_url}")  # ✅ Print the final request URL before sending
+
+#     try:
+# #        response = requests.get(VLC_STATUS_URL, params=params, auth=(VLC_USER, VLC_PASSWORD))
+#         response = requests.get(full_url, auth=(VLC_USER, VLC_PASSWORD))
+#         response.raise_for_status()
+#         return jsonify({"status": "success"})
+#     except requests.exceptions.RequestException as e:
+#         return jsonify({"error": str(e)}), 500
 
 
 @app.route('/config')

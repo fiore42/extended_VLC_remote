@@ -252,3 +252,76 @@ document.getElementById('vlcVolume').addEventListener('input', (e) => {
 document.getElementById('systemVolume').addEventListener('input', (e) => {
     getSystemVolume(e.target.value);
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const menuButton = document.getElementById("menuButton");
+    const sidebar = document.getElementById("sidebar");
+    const closeMenu = document.getElementById("closeMenu");
+
+    // Create overlay only once and append it
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    document.body.appendChild(overlay); // Add overlay to the DOM
+
+    function openMenu() {
+        console.log("🔵 Menu Opened"); // Debugging        
+        sidebar.classList.add("open");
+        document.body.classList.add("menu-active");
+        document.body.appendChild(overlay); // Ensure overlay is added
+        overlay.classList.add("visible"); // Show overlay
+    }
+
+    function closeMenuFunc() {
+        console.log("🔴 Menu Closed");
+
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.querySelector(".overlay");
+
+        // Remove the "open" class
+        sidebar.classList.remove("open");
+        document.body.classList.remove("menu-active");
+
+        // Ensure sidebar is hidden by setting styles
+        // this is ugly and shouldn't be needed, but I had a persistent bug 
+        // that I couldn't find: closing the menu from the X works, 
+        // but clicking overlay didn't hide the menu 
+        sidebar.style.left = "-250px";  
+        sidebar.style.display = "none";  
+
+        if (overlay) {
+            overlay.classList.remove("visible");
+            console.log("🟡 Removing overlay from DOM"); // Debugging
+            document.body.removeChild(overlay);
+        }
+    }
+
+    menuButton.addEventListener("click", function (event) {
+        console.log("📌 Clicked menu button");
+        event.stopPropagation();
+        openMenu();
+    });
+
+    closeMenu.addEventListener("click", function (event) {
+        console.log("📌 Clicked close button");
+        event.stopPropagation();
+        requestAnimationFrame(closeMenuFunc);
+    });
+
+    // Ensure clicking overlay closes menu
+    overlay.addEventListener("click", function (event) {
+        console.log("📌 Clicked overlay");
+        event.stopPropagation();
+        closeMenuFunc(); // Calls the SAME function as clicking close button
+    });
+
+
+    const sidebarLinks = sidebar.querySelectorAll('a');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function () {
+            console.log(`📌 Clicked sidebar link: ${this.textContent}`);
+            closeMenuFunc();
+        });
+    });
+});
+
+
