@@ -340,21 +340,48 @@ def get_config():
     """Serve config.json to the frontend."""
     return config, 200, {"Content-Type": "application/json"}
 
+ALLOWED_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
+
 @app.route('/list_media')
 def list_media():
-    """Lists video files in /media and subdirectories."""
-    allowed_extensions = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
+    """Lists valid video files & first-level subfolders in a given directory."""
+    requested_path = request.args.get("path", MEDIA_DIR)  # Get requested path
+
+    # Ensure path is inside MEDIA_DIR
+    if not requested_path.startswith(MEDIA_DIR):
+        requested_path = MEDIA_DIR
+
     media_files = []
+    subfolders = []
 
-    for root, _, files in os.walk(MEDIA_DIR):
-        for file in files:
-            if os.path.splitext(file)[1].lower() in allowed_extensions:
-                media_files.append(os.path.join(root, file))
+    # Scan directory
+    try:
+        for entry in os.scandir(requested_path):
+            if entry.is_dir():  # If it's a folder, check if it contains valid files
+                sub_path = os.path.join(requested_path, entry.name)
+                if any(
+                    os.path.splitext(file)[1].lower() in ALLOWED_EXTENSIONS
+                    for file in os.listdir(sub_path)
+                ):
+                    subfolders.append(entry.name)
+            elif entry.is_file():  # If it's a file, check if it's a valid video file
+                if os.path.splitext(entry.name)[1].lower() in ALLOWED_EXTENSIONS:
+                    media_files.append(entry.name)
 
-    if not media_files:
-        return jsonify({"error": "No media files found."})
+        response = {
+            "current_path": requested_path,
+            "folders": sorted(subfolders),
+            "files": sorted(media_files),
+        }
 
-    return jsonify({"files": media_files})
+        # Add parent folder entry (if not at MEDIA_DIR)
+        if requested_path != MEDIA_DIR:
+            response["parent"] = os.path.dirname(requested_path)
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/browser')
 def browser():
