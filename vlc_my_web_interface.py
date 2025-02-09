@@ -308,7 +308,7 @@ def vlc_command():
 @app.route('/config')
 def get_config():
     """Serve config.json to the frontend."""
-    return config_data, 200, {"Content-Type": "application/json"}
+    return config, 200, {"Content-Type": "application/json"}
 
 
 @app.route('/')
