@@ -375,6 +375,7 @@ def list_media():
     if LAST_OPENED and not requested_path:
         requested_path = last_opened_folder or MEDIA_DIR  # Default to MEDIA_DIR if never set
 
+    print(f"requested_path AFTER: {requested_path}")  # Debugging output
     requested_path = os.path.abspath(os.path.join(MEDIA_DIR, unquote(requested_path)))
 
     # Ensure security: restrict to MEDIA_DIR and prevent path traversal
