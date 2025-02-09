@@ -315,6 +315,22 @@ def get_config():
     """Serve config.json to the frontend."""
     return config, 200, {"Content-Type": "application/json"}
 
+@app.route('/list_media')
+def list_media():
+    """Lists video files in /media and subdirectories."""
+    allowed_extensions = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
+    media_files = []
+
+    for root, _, files in os.walk(MEDIA_DIR):
+        for file in files:
+            if os.path.splitext(file)[1].lower() in allowed_extensions:
+                media_files.append(os.path.join(root, file))
+
+    if not media_files:
+        return jsonify({"error": "No media files found."})
+
+    return jsonify({"files": media_files})
+
 
 @app.route('/')
 def index():
