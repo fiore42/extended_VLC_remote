@@ -108,8 +108,8 @@ def update_vlc_status_periodically():
         should_broadcast_ignored = bool(ignored_keys_changed) and (current_time - last_update_time) > 60
         should_broadcast_immediate = bool(immediate_keys_changed)
 
-        print("should_broadcast_ignored:", should_broadcast_ignored)
-        print("should_broadcast_immediate:", should_broadcast_immediate)
+        # print("should_broadcast_ignored:", should_broadcast_ignored)
+        # print("should_broadcast_immediate:", should_broadcast_immediate)
 
 
         if should_broadcast_immediate:
