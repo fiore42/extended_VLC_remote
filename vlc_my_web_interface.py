@@ -19,6 +19,11 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 # def log_request():
 #     print(f"Request: {request.method} {request.path} from {request.remote_addr}")
 
+def str_to_bool(value, default=True):
+    if value is None:
+        return default
+    return str(value).strip().lower() == "true"
+
 # Load config.json
 CONFIG_FILE = "static/config.json"
 
@@ -92,11 +97,6 @@ VLC_STATUS_URL = f"{VLC_URL}{VLC_XML}"
 
 # In-memory storage for the last opened folder
 last_opened_folder = None
-
-def str_to_bool(value, default=True):
-    if value is None:
-        return default
-    return str(value).strip().lower() == "true"
 
 def fetch_vlc_status(): # function that fetches VLC data
     try:
