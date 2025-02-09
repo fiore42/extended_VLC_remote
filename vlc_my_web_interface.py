@@ -456,20 +456,20 @@ def index():
 
 def start_vlc():
     """Starts VLC in a new thread if it's not running."""
-    print("🟡 Checking if VLC is running...")
+    print("Checking if VLC is running...")
     try:
         response = requests.get(VLC_STATUS_URL, auth=(VLC_USER, VLC_PASSWORD), timeout=2)
         if response.status_code == 200:
-            print("✅ VLC is already running.")
+            print("VLC is already running.")
             return  # VLC is already running
     except requests.exceptions.RequestException:
-        print("❌ VLC is not running. Starting VLC...")
+        print("VLC is not running. Starting VLC...")
 
     def run_vlc():
         os.environ["DISPLAY"] = config["DISPLAY"]  # Ensure DISPLAY is set
         cmd = f'{VLC_BIN} --http-password {VLC_PWD} --http-host={VLC_HOST} --http-port={VLC_PORT}'
         subprocess.Popen(shlex.split(cmd), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print("✅ VLC started.")
+        print("VLC started.")
 
     # Start VLC in a separate thread
     threading.Thread(target=run_vlc, daemon=True).start()
