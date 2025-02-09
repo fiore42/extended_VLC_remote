@@ -56,8 +56,8 @@ DEFAULTS = {
     "VLC_HOST": "127.0.0.1",
     "VLC_ADDR": "localhost",
     "VLC_USER": "",
-    "VLC_XML": "/requests/status.xml"
-
+    "VLC_XML": "/requests/status.xml",
+    "LAST_OPENED": "true"
 }
 
 # Apply defaults for optional keys
@@ -79,6 +79,7 @@ try:
     VLC_USER = config["VLC_USER"]
     VLC_PASSWORD = config["VLC_PWD"]
     VLC_XML = config["VLC_XML"]
+    LAST_OPENED = str_to_bool(config.get("LAST_OPENED"), default=True)
 except ValueError as e:
     sys.exit(f"Error: Invalid numeric value in configuration: {e}")
 
@@ -88,6 +89,14 @@ print(f"Final Config Values:\n{json.dumps(config, indent=2)}")
 VLC_URL = f"http://{VLC_ADDR}:{VLC_PORT}"
 
 VLC_STATUS_URL = f"{VLC_URL}{VLC_XML}"
+
+# In-memory storage for the last opened folder
+last_opened_folder = None
+
+def str_to_bool(value, default=True):
+    if value is None:
+        return default
+    return str(value).strip().lower() == "true"
 
 def fetch_vlc_status(): # function that fetches VLC data
     try:
@@ -353,8 +362,16 @@ ALLOWED_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
 
 @app.route('/list_media')
 def list_media():
+
     """Lists video files in the requested path & classifies folders as playable or normal."""
-    requested_path = request.args.get("path", MEDIA_DIR)
+    global last_opened_folder
+
+    requested_path = request.args.get("path")
+
+    # If LAST_OPENED is enabled and no specific path is requested, use the last folder browsed
+    if LAST_OPENED and not requested_path:
+        requested_path = last_opened_folder or MEDIA_DIR  # Default to MEDIA_DIR if never set
+
     requested_path = os.path.abspath(os.path.join(MEDIA_DIR, unquote(requested_path)))
 
     # Ensure security: restrict to MEDIA_DIR and prevent path traversal
