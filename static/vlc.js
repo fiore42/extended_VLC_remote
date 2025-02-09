@@ -170,8 +170,8 @@ function processVLCStatus(data) {
     document.getElementById('vlcVolume').value = scaledVolume;
     document.getElementById('vlcValue').textContent = `${scaledVolume}%`;
 
-    document.getElementById('playPause').textContent = data.state === "playing" ? "⏸ Pause" : "▶ Play";
-    document.getElementById('fullscreenToggle').textContent = data.fullscreen === "true" ? "⛶ Exit Fullscreen" : "⛶ Fullscreen";
+    document.getElementById('playPause').textContent = data.state === "playing" ? "⏸️ Pause" : "▶️ Play";
+    document.getElementById('fullscreenToggle').textContent = data.fullscreen === "true" ? "📺 Exit Fullscreen" : "📺 Fullscreen";
 
     console.log("Filename:", filename);
     console.log("Seek Position:", document.getElementById('seekSlider').value);
