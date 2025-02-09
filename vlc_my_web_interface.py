@@ -38,15 +38,29 @@ except Exception as e:
 
 # List of required keys
 REQUIRED_KEYS = [
-    "FLASK_HOST", "FLASK_PORT", "MAX_VLC_VOLUME", "REFRESH_RATE", 
-    "MEDIA_DIR", "VLC_BIN", "DISPLAY", "VLC_HOST", "VLC_PORT", 
-    "VLC_ADDR", "VLC_USER", "VLC_PASSWORD"
+    "FLASK_PORT", "MEDIA_DIR", "VLC_PORT", "VLC_PWD"
 ]
 
 # Validate presence and non-emptiness
 for key in REQUIRED_KEYS:
     if key not in config or config[key] == "":
         sys.exit(f"Error: Missing or empty required configuration key: {key}")
+
+# Define default values for optional keys
+DEFAULTS = {
+    "FLASK_HOST": "0.0.0.0",
+    "MAX_VLC_VOLUME": 512,
+    "REFRESH_RATE": 1,
+    "VLC_BIN": "/usr/bin/vlc",
+    "DISPLAY": ":0",
+    "VLC_HOST": "127.0.0.1",
+    "VLC_ADDR": "localhost",
+    "VLC_USER": ""
+}
+
+# Apply defaults for optional keys
+for key, default_value in DEFAULTS.items():
+    config[key] = config.get(key, default_value) or default_value  # Use default if missing or empty
 
 # Convert necessary values to the correct type
 try:
