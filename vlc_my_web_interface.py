@@ -303,15 +303,35 @@ def get_current_volume():
 #     except Exception as e:
 #         return jsonify({"error": str(e)}), 500
 
+# @app.route('/vlc_command')
+# def vlc_command():
+#     command = request.args.get('cmd', '')
+#     value = request.args.get('val', '')
+
+#     try:
+#         requests.get(VLC_STATUS_URL, params={"command": command, "val": value}, auth=(VLC_USER, VLC_PASSWORD))
+#         return jsonify({"status": "success"})
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+
 @app.route('/vlc_command')
 def vlc_command():
     command = request.args.get('cmd', '')
     value = request.args.get('val', '')
 
+    # If command is "in_play", use "input" instead of "val"
+    params = {"command": command}
+    if command == "in_play":
+        params["input"] = value  # VLC expects "input" for in_play
+    else:
+        params["val"] = value  # Use "val" for all other commands
+
     try:
-        requests.get(VLC_STATUS_URL, params={"command": command, "val": value}, auth=(VLC_USER, VLC_PASSWORD))
+        response = requests.get(VLC_STATUS_URL, params=params, auth=(VLC_USER, VLC_PASSWORD))
+        response.raise_for_status()
         return jsonify({"status": "success"})
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         return jsonify({"error": str(e)}), 500
 
 
